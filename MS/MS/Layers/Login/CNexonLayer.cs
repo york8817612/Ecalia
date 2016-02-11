@@ -36,34 +36,37 @@ namespace MS.Layers.Login
            
         }
 
+        ~CNexonLayer()
+        {
+            texture = null;
+            sprite = null;
+            animation = null;
+            frames = null;
+            Width = null;
+            Height = null;
+            X = null;
+            Y = null;
+        }
+
         public override void OnEnter()
         {
             using (reWZ.WZFile ui = new reWZ.WZFile(AppDomain.CurrentDomain.BaseDirectory + @"/UI.wz", GameConstants.Variant, true))
             {
-                foreach (WZImage main in ui.MainDirectory)
+                var nexon = ui.MainDirectory["Logo.img"]["Nexon"];
+
+                foreach (WZCanvasProperty canvas in nexon)
                 {
-                    if (main.Name == "Logo.img")
-                    {
-                        foreach (WZSubProperty sub in main)
-                        {
-                            if (sub.Name == "Nexon")
-                            {
-                                foreach (WZCanvasProperty canvas in sub)
-                                {
-                                    frames.Add(CT2B.GetTexture(canvas.Value));
+                    frames.Add(CT2B.GetTexture(canvas.Value));
 
-                                    origin = (WZPointProperty)canvas["origin"];
+                    origin = (WZPointProperty)canvas["origin"];
 
-                                    Width.Add(canvas.Value.Width);
-                                    Height.Add(canvas.Value.Height);
+                    Width.Add(canvas.Value.Width);
+                    Height.Add(canvas.Value.Height);
 
-                                    X.Add(origin.Value.X);
-                                    Y.Add(origin.Value.Y);
-                                }
-                            }
-                        }
-                    }
+                    X.Add(origin.Value.X);
+                    Y.Add(origin.Value.Y);
                 }
+                
             }
 
             FrameCount = frames.Count;
@@ -113,23 +116,37 @@ namespace MS.Layers.Login
 
             AddChild(sprite[0]);
 
-            var wizet = new Thread(new ThreadStart(MoveToWizet));
-            wizet.Start();
+            MoveToWizet();
 
             base.OnEnter();
+        }
+
+        public override void OnExit()
+        {
+            Console.WriteLine("OnExit");
+            GC.SuppressFinalize(this);
+            frames.Clear();
+            texture = null;
+            sprite = null;
+            animation = null;
+            Width = null;
+            Height = null;
+            X = null;
+            Y = null;
+            base.OnExit();
         }
 
         private void MoveToWizet()
         {
 
-            if (GameConstants.GREATER_VERSION)
+            if (!GameConstants.GREATER_VERSION)
             {
-                Console.WriteLine("Moved To Wziet None Greater");
-                ScheduleOnce(TransitionOut, 2);
+                Console.WriteLine("Moved To Wizet None Greater");
+                ScheduleOnce(TransitionOut, 1);
             }
             else
             {
-                Console.WriteLine("Moved To Wziet Greater");
+                Console.WriteLine("Moved To Wizet Greater");
                 ScheduleOnce(TransitionOut, 6);
             }
         }

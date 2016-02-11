@@ -10,7 +10,7 @@ namespace MS.Common
     {
         #region Version Settings
 
-        public static ushort MAJOR_VERSION = 100;
+        public static ushort MAJOR_VERSION = 110;
         public static string MINOR_VERSION = "1";
         public static bool GREATER_VERSION = (MAJOR_VERSION > 79 ? true : false); // change the number to whatever the version maple changed the nexon logo animation, I think its 79 but idk.. 
         public static reWZ.WZVariant Variant = (GREATER_VERSION ? reWZ.WZVariant.BMS : reWZ.WZVariant.GMS);
