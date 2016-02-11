@@ -2,30 +2,23 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Cocos2D;
+using MS.Common.Net;
 
 namespace MS
 {
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Game1 : Game
+    public class MainGame : Game
     {
         private readonly GraphicsDeviceManager graphics;
+        private CNetwork network = new CNetwork("127.0.0.1", 8484);
 
-        public Game1()
+        public MainGame()
         {
             graphics = new GraphicsDeviceManager(this);
-            //#if MACOS
-            //            Content.RootDirectory = "AngryNinjas/Content";
-            //#else
-            //Content.RootDirectory = "Content";
-            //#endif
-            //
-            //#if XBOX || OUYA
-            //            graphics.IsFullScreen = true;
-            //#else
+
             graphics.IsFullScreen = false;
-            //#endif
 
             // Frame rate is 30 fps by default for Windows Phone.
             TargetElapsedTime = TimeSpan.FromTicks(333333 / 2);
@@ -35,6 +28,8 @@ namespace MS
 
             CCApplication application = new AppDelegate(this, graphics);
             Components.Add(application);
+
+            //network.Initialize();
         }
 
         private void ProcessBackClick()

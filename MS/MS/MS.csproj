@@ -44,10 +44,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AppDelegate.cs" />
+    <Compile Include="Common\GameConstants.cs" />
     <Compile Include="Common\Imaging\CT2B.cs" />
+    <Compile Include="Common\Net\CNetwork.cs" />
     <Compile Include="Layers\Login\CLoginLayer.cs" />
     <Compile Include="Layers\Login\CWizetLayer.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="MainGame.cs" />
     <Compile Include="Layers\Login\CNexonLayer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -115,6 +117,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="zlib.net, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Cocos2D-XNA.WindowsDX.1.3.0.2\lib\net40\zlib.net.dll</HintPath>
@@ -134,15 +137,18 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Deps\ms-reWZ-master\reWZ.csproj">
+    <Folder Include="Layers\Character\" />
+    <Folder Include="Layers\Map\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Deps\ms-reWZ-master\reWZ.csproj">
       <Project>{85f7fe6d-63ac-44a1-83d2-ce5204e7535e}</Project>
       <Name>reWZ</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\Net\" />
-    <Folder Include="Layers\Character\" />
-    <Folder Include="Layers\Map\" />
+    <ProjectReference Include="..\..\..\Deps\netsockets\NetSockets\NetSockets.csproj">
+      <Project>{bd34bebb-9ee0-4d18-b504-c2f522925642}</Project>
+      <Name>NetSockets</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -5,26 +5,27 @@ using Cocos2D;
 using System.Threading;
 using System.Collections.Generic;
 using MS.Common.Imaging;
+using MS.Common;
 
 namespace MS.Layers.Login
 {
     /// <summary>
     /// Layer that handles Wizet Logo
     /// </summary>
-    public class CWizetLayer : CCLayer, IDisposable
+    public class CWizetLayer : CCLayer
     {
-        List<Microsoft.Xna.Framework.Graphics.Texture2D> frames = new List<Microsoft.Xna.Framework.Graphics.Texture2D>();
-        CCTexture2D texture = new CCTexture2D();
-        CCTexture2D[] textures = new CCTexture2D[1024];
-        CCSprite[] sprite = new CCSprite[1024];
-
         private WZPointProperty origin;
+        private CCTexture2D[] texture = new CCTexture2D[1024];
+        private CCSprite[] sprite = new CCSprite[1024];
+        private CCAnimation animation = new CCAnimation();
+        private CCAnimate animate;
 
-        private float X { get; set; }
-        private float Y { get; set; }
-
+        private List<Microsoft.Xna.Framework.Graphics.Texture2D> frames = new List<Microsoft.Xna.Framework.Graphics.Texture2D>();
         private List<int> Width = new List<int>();
         private List<int> Height = new List<int>();
+        private List<float> X = new List<float>();
+        private List<float> Y = new List<float>();
+        private int FrameCount { get; set; }
 
         public CWizetLayer()
         {
@@ -33,7 +34,7 @@ namespace MS.Layers.Login
 
         private void MoveToLogin()
         {
-            //ScheduleOnce(TransitionToLogin, 2);
+            //ScheduleOnce(TransitionToLogin, 10);
         }
 
         private void TransitionToLogin(float obj)
@@ -41,23 +42,6 @@ namespace MS.Layers.Login
             CCTransitionScene transition = new CCTransitionFade(1, CLoginLayer.Scene);
 
             CCDirector.SharedDirector.ReplaceScene(transition);
-        }
-
-        public virtual void Dispose(bool b)
-        {
-            if (b)
-            {
-                GC.SuppressFinalize(this);
-                Dispose();
-            } else
-            {
-                Dispose();
-            }
-        }
-
-        public void Dispose()
-        {
-            ((IDisposable)texture).Dispose();
         }
 
         public static CCScene Scene
@@ -74,17 +58,10 @@ namespace MS.Layers.Login
             }
         }
 
-        public override void OnExit()
-        {
-            base.OnExit();
-            var login = new Thread(new ThreadStart(MoveToLogin));
-            login.Start();
-        }
-
         public override void OnEnter()
         {
             base.OnEnter();
-            using (WZFile ui = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"/UI.wz", reWZ.WZVariant.GMS, true))
+            using (WZFile ui = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"/UI.wz", GameConstants.Variant, true))
             {
                 foreach (WZImage main in ui.MainDirectory)
                 {
@@ -103,6 +80,9 @@ namespace MS.Layers.Login
                                     Width.Add(canvas.Value.Width);
                                     Height.Add(canvas.Value.Height);
 
+                                    X.Add(origin.Value.X);
+                                    Y.Add(origin.Value.Y);
+
                                     if (frames.Count == sub.ChildCount)
                                     {
                                         break;
@@ -112,58 +92,55 @@ namespace MS.Layers.Login
                         }
                     }
                 }
-                var frameCount = 0;
+                FrameCount = frames.Count;
 
-                for (int i = 0; i < frames.Count; i++)
+                for (int t = 0; t < FrameCount; t++)
                 {
-                    textures[i] = new CCTexture2D();
-                    textures[i].InitWithTexture(frames[i]);
-                    frameCount = i;
+                    texture[t] = new CCTexture2D();
+                    texture[t].InitWithTexture(frames[t]);
+
+                    if (t == FrameCount)
+                        break;
                 }
 
-                //textures[0].InitWithTexture(frames[0]);
-                X = origin.Value.X;
-                Y = origin.Value.Y;
-
-                Console.WriteLine("X: {0} Y: {1}", X * (float)2.91 / 2, Y * (float)2.86 / 2);
-                Console.WriteLine("Width: {0} Height: {1}", Width[0], Height[0]);
-
-                CCAnimation anim = new CCAnimation();
-
-                for (int ii = 0; ii < frames.Count; ii++)
+                for (int s = 0; s < FrameCount; s++)
                 {
-                    sprite[ii] = new CCSprite(textures[ii]);
-                    sprite[ii].SetPosition(X * (float)2.91 / 2, Y * (float)2.86 / 2);
-                    sprite[ii].SetTextureRect(new CCRect(0, 0, 800, 600)); // using this for now since 550/420 is too small for a windowed screen
-                    anim.AddSprite(sprite[ii]);
+                    sprite[s] = new CCSprite(texture[s]);
+                    sprite[s].SetPosition(X[s] * (float)2.91 / 2, Y[s] * (float)2.86 / 2);
+                    sprite[s].SetTextureRect(new CCRect(0, 0, 800, 600));
+
+                    if (s == FrameCount)
+                        break;
                 }
 
-                //anim.AddSprite(sprite[0]);
-                //anim.AddSprite(sprite[1]);
-                //anim.AddSprite(sprite[2]);
-                //anim.AddSprite(sprite[50]);
-                anim.Loops = Convert.ToUInt32(1);
-                anim.DelayPerUnit = 0.2f;
+                for (int a = 0; a < FrameCount; a++)
+                {
+                    animation.AddSprite(sprite[a]);
 
-                CCAnimate ate = new CCAnimate(anim);
-                ate.Duration = 1.8f;
-                //ate
-                
-                sprite[0].RunAction(new CCAnimate(anim));
+                    if (a == FrameCount)
+                        break;
+                }
+
+                animation.Loops = 1;
+                animation.DelayPerUnit = .1f;
+
+                animate = new CCAnimate(animation);
+                animate.Duration = 7.0f;
+
+                sprite[0].RunAction(animate);
                 AddChild(sprite[0]);
-                //sprite[0] = new CCSprite(textures[0]);
-                //sprite[0].SetPosition(X * (float)2.91 / 2, Y * (float)2.86 / 2);
-                //sprite[0].SetTextureRect(new CCRect(0, 0, 800, 600)); // using this for now since 550/420 is too small for a windowed screen
 
+                var login = new Thread(new ThreadStart(MoveToLogin));
+                login.Start();
             }
         }
 
-        public override void Update(float dt)
+        public override void OnExit()
         {
-            base.Update(dt);
+            base.OnExit();
+        }
 
-            int current = 0;
-            float elapse = dt;
-         }
+        /* var login = new Thread(new ThreadStart(MoveToLogin));
+                login.Start();*/
     }
 }
