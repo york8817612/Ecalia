@@ -14,14 +14,13 @@ using System.Security.Cryptography;
 
 namespace MS.Common.Net
 {
-    public class CNetwork : NetBaseClient<byte[]>
+    public partial class CNetwork : NetBaseClient<byte[]>
     {
         AesManaged aes = new AesManaged();
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[1024]; // This really isnt used in the end of the day...just need to initialize the reader
         ArrayReader reader;
         ArrayWriter writer;
-        ushort GV = 62;
-        ulong AESKey = 0x130806B41B0F3352;
+        //ulong AESKey = 0x130806B41B0F3352;
         NetObjectClient client;
         
 
@@ -55,22 +54,14 @@ namespace MS.Common.Net
 
         private void CNetwork_OnReceived(object sender, NetReceivedEventArgs<byte[]> e)
         {
-            // Server send = our recv || server recv = our send
             Console.WriteLine(ByteArrayToString(e.Data));
             reader = new ArrayReader(e.Data, e.Data.Length);
-            short header = reader.ReadShort();
+            FROM_SERVER header = (FROM_SERVER)reader.ReadShort();
             byte[] check;
 
             switch (header)
             {
-                case 0x0D:
-                    Console.WriteLine("Hello");
-                    writer.WriteShort(0x01);
-                    writer.WriteMapleString("admin");
-                    writer.WriteMapleString("admin");
-                    check = writer.ToArray();
-                    Console.WriteLine(BitConverter.ToString(check));
-                    Send(check);
+                case FROM_SERVER.CLIENT_HELLO:
                     break;
             }
         }
@@ -82,8 +73,7 @@ namespace MS.Common.Net
 
         private void CNetwork_OnConnected(object sender, NetConnectedEventArgs e)
         {
-            //Send(SendHandShake());
-            //NetUtility.Ping(IP, Port, TimeSpan.FromSeconds(10));
+            Console.WriteLine("Client has connected to server");
         }
 
         private byte[] SendHandShake()

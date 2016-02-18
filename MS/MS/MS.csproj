@@ -50,7 +50,7 @@
     <Compile Include="Common\Net\ArrayReader.cs" />
     <Compile Include="Common\Net\ArrayWriter.cs" />
     <Compile Include="Common\Net\CNetwork.cs" />
-    <Compile Include="Common\Net\Message.cs" />
+    <Compile Include="Common\Net\Opcodes.cs" />
     <Compile Include="Layers\Login\CLoginLayer.cs" />
     <Compile Include="Layers\Login\CWizetLayer.cs" />
     <Compile Include="MainGame.cs" />
