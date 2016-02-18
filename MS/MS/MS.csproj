@@ -25,6 +25,7 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <RunCodeAnalysis>false</RunCodeAnalysis>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -46,6 +47,8 @@
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Common\GameConstants.cs" />
     <Compile Include="Common\Imaging\CTextureEngine.cs" />
+    <Compile Include="Common\Net\ArrayReader.cs" />
+    <Compile Include="Common\Net\ArrayWriter.cs" />
     <Compile Include="Common\Net\CNetwork.cs" />
     <Compile Include="Common\Net\Message.cs" />
     <Compile Include="Layers\Login\CLoginLayer.cs" />
@@ -142,10 +145,6 @@
     <Folder Include="Layers\Map\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Deps\DarkMapleLib\DarkMapleLib\DarkMapleLib.csproj">
-      <Project>{59829e40-6278-4bde-9718-310b7a2200d0}</Project>
-      <Name>DarkMapleLib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\Deps\ms-reWZ-master\reWZ.csproj">
       <Project>{85f7fe6d-63ac-44a1-83d2-ce5204e7535e}</Project>
       <Name>reWZ</Name>

@@ -23,7 +23,6 @@ namespace MS.Common.Net
         ushort GV = 62;
         ulong AESKey = 0x130806B41B0F3352;
         NetObjectClient client;
-        Cipher cry;
         
 
         public string IP { get; private set; }
@@ -36,7 +35,6 @@ namespace MS.Common.Net
             Port = port;
             writer = new ArrayWriter();
             reader = new ArrayReader(buffer);
-            cry = new Cipher(GV, AESKey);
         }
 
         public void Initialize()
@@ -72,7 +70,6 @@ namespace MS.Common.Net
                     writer.WriteMapleString("admin");
                     check = writer.ToArray();
                     Console.WriteLine(BitConverter.ToString(check));
-                    cry.Encrypt(ref check, false);
                     Send(check);
                     break;
             }
@@ -100,9 +97,6 @@ namespace MS.Common.Net
             writer.WriteByte(0);
 
             result = writer.ToArray();
-
-            cry.Encrypt(ref result, false);
-            cry.SetIV(0);
 
             return result;
         }
