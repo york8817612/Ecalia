@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Cocos2D;
 using MS.Common.Net;
+using MS.Common;
 
 namespace MS
 {
@@ -12,7 +13,7 @@ namespace MS
     public class MainGame : Game
     {
         private readonly GraphicsDeviceManager graphics;
-        private CNetwork network = new CNetwork("127.0.0.1", 8484);
+        private CNetwork network = new CNetwork(GameConstants.IP, GameConstants.LOGIN_PORT);
 
         public MainGame()
         {
@@ -56,6 +57,12 @@ namespace MS
 
 
             base.Update(gameTime);
+        }
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            network.Disconnect();
+            base.OnExiting(sender, args);
         }
     }
 }

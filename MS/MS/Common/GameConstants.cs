@@ -10,10 +10,10 @@ namespace MS.Common
     {
         #region Version Settings
 
-        public static ushort MAJOR_VERSION = 110;
+        public static ushort MAJOR_VERSION = 62;
         public static string MINOR_VERSION = "1";
         public static bool GREATER_VERSION = (MAJOR_VERSION > 79 ? true : false); // change the number to whatever the version maple changed the nexon logo animation, I think its 79 but idk.. 
-        public static reWZ.WZVariant Variant = (GREATER_VERSION ? reWZ.WZVariant.BMS : reWZ.WZVariant.GMS);
+        
 
         #endregion
 
@@ -24,6 +24,38 @@ namespace MS.Common
         public static bool WINDOWED = true;
         public static float WIN_FPS = 60;
 
-        #endregion 
+        #endregion
+
+        #region Network Settings
+
+        public static string IP = "127.0.0.1";
+        public static int LOGIN_PORT = 8484;
+        public static int CHANNEL_PORT;
+        public static int WORLD_PORT;
+
+        #endregion
+
+        #region WZ File Settings
+
+        public static reWZ.WZVariant Variant = (GREATER_VERSION ? reWZ.WZVariant.BMS : reWZ.WZVariant.GMS);
+        public static string BASE = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            CHARACTER = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            EFFECT = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            ETC = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            ITEM = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            LIST = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            MAP = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            MOB = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            MORPH = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            NPC = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            QUEST = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            REACTOR = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            SKILL = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            SOUND = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            STRING = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            TAMING_MOB = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            UI = (GREATER_VERSION ? "UI2.wz" : "UI1.wz");
+
+        #endregion
     }
 }

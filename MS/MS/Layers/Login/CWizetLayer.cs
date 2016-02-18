@@ -20,12 +20,10 @@ namespace MS.Layers.Login
         private CCAnimation animation = new CCAnimation();
         private CCAnimate animate;
 
-        private List<Microsoft.Xna.Framework.Graphics.Texture2D> frames = new List<Microsoft.Xna.Framework.Graphics.Texture2D>();
-        private List<int> Width = new List<int>();
-        private List<int> Height = new List<int>();
-        private List<float> X = new List<float>();
-        private List<float> Y = new List<float>();
         private int FrameCount { get; set; }
+
+        CTextureEngine texEngine = new CTextureEngine();
+
 
         public CWizetLayer()
         {
@@ -34,7 +32,7 @@ namespace MS.Layers.Login
 
         private void MoveToLogin()
         {
-            //ScheduleOnce(TransitionToLogin, 10);
+            ScheduleOnce(TransitionToLogin, 5);
         }
 
         private void TransitionToLogin(float obj)
@@ -61,29 +59,27 @@ namespace MS.Layers.Login
         public override void OnEnter()
         {
             base.OnEnter();
-            using (WZFile ui = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"/UI.wz", GameConstants.Variant, true))
+            using (WZFile ui = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true))
             {
                 var wizet = ui.MainDirectory["Logo.img"]["Wizet"];
 
                 foreach (WZCanvasProperty canvas in wizet)
                 {
-                    frames.Add(CT2B.GetTexture(canvas.Value));
+                    texEngine.AddTexture(canvas.Value);
 
                     origin = (WZPointProperty)canvas["origin"];
 
-                    Width.Add(canvas.Value.Width);
-                    Height.Add(canvas.Value.Height);
+                    texEngine.AddSize(canvas.Value.Width, canvas.Value.Height);
 
-                    X.Add(origin.Value.X);
-                    Y.Add(origin.Value.Y);
+                    texEngine.AddPos(origin.Value.X, origin.Value.Y);
                 }
             }
-            FrameCount = frames.Count;
+            FrameCount = texEngine.Frame.Count;
 
             for (int t = 0; t < FrameCount; t++)
             {
                 texture[t] = new CCTexture2D();
-                texture[t].InitWithTexture(frames[t]);
+                texture[t].InitWithTexture(texEngine.Frame[t]);
 
                 if (t == FrameCount)
                     break;
@@ -92,7 +88,7 @@ namespace MS.Layers.Login
             for (int s = 0; s < FrameCount; s++)
             {
                 sprite[s] = new CCSprite(texture[s]);
-                sprite[s].SetPosition(X[s] * (float)2.91 / 2, Y[s] * (float)2.86 / 2);
+                sprite[s].SetPosition(texEngine.X[s] * (float)2.91 / 2, texEngine.Y[s] * (float)2.86 / 2);
                 sprite[s].SetTextureRect(new CCRect(0, 0, 800, 600));
 
                 if (s == FrameCount)
@@ -111,7 +107,7 @@ namespace MS.Layers.Login
             animation.DelayPerUnit = .1f;
 
             animate = new CCAnimate(animation);
-            animate.Duration = 7.0f;
+            animate.Duration = 5.0f;
 
             sprite[0].RunAction(animate);
             AddChild(sprite[0]);
@@ -121,12 +117,15 @@ namespace MS.Layers.Login
 
         }
 
+        public override void OnEnterTransitionDidFinish()
+        {
+            MoveToLogin();
+            base.OnEnterTransitionDidFinish();
+        }
+
         public override void OnExit()
         {
             base.OnExit();
         }
-
-        /* var login = new Thread(new ThreadStart(MoveToLogin));
-                login.Start();*/
     }
 }
