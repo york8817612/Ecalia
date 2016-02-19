@@ -44,7 +44,7 @@ namespace MS.Common
             ETC = (GREATER_VERSION ? "2.wz" : "1.wz"),
             ITEM = (GREATER_VERSION ? "2.wz" : "1.wz"),
             LIST = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            MAP = (GREATER_VERSION ? "2.wz" : "1.wz"),
+            MAP = (GREATER_VERSION ? "Map.wz" : "Map.wz"),
             MOB = (GREATER_VERSION ? "2.wz" : "1.wz"),
             MORPH = (GREATER_VERSION ? "2.wz" : "1.wz"),
             NPC = (GREATER_VERSION ? "2.wz" : "1.wz"),

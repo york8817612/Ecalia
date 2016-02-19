@@ -66,12 +66,9 @@ namespace MS.Layers.Login
                 foreach (WZCanvasProperty canvas in wizet)
                 {
                     texEngine.AddTexture(canvas.Value);
-
-                    origin = (WZPointProperty)canvas["origin"];
-
                     texEngine.AddSize(canvas.Value.Width, canvas.Value.Height);
-
-                    texEngine.AddPos(origin.Value.X, origin.Value.Y);
+                    texEngine.AddOrigin(canvas);
+                    texEngine.AddPos(texEngine.Origin.Value.X, texEngine.Origin.Value.Y);
                 }
             }
             FrameCount = texEngine.Frame.Count;
@@ -114,17 +111,12 @@ namespace MS.Layers.Login
 
             var login = new Thread(new ThreadStart(MoveToLogin));
             login.Start();
-
-        }
-
-        public override void OnEnterTransitionDidFinish()
-        {
-            MoveToLogin();
-            base.OnEnterTransitionDidFinish();
+            login.Join();
         }
 
         public override void OnExit()
         {
+            GC.SuppressFinalize(this);
             base.OnExit();
         }
     }

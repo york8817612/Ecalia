@@ -16,10 +16,17 @@ namespace MS.Common.Imaging
         private List<int> Height_ = new List<int>();
         private List<float> X_ = new List<float>();
         private List<float> Y_ = new List<float>();
+        private WZPointProperty origin;
 
         public CTextureEngine()
         {
 
+        }
+
+        public WZPointProperty AddOrigin(WZCanvasProperty img)
+        {
+            origin = (WZPointProperty)img["origin"];
+            return origin;
         }
 
         public void AddSize(int width, int height)
@@ -62,6 +69,11 @@ namespace MS.Common.Imaging
         public List<Microsoft.Xna.Framework.Graphics.Texture2D> Frame
         {
             get { return frames; }
+        }
+
+        public WZPointProperty Origin
+        {
+            get { return origin; }
         }
 
         /// <summary>

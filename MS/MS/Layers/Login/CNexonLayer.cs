@@ -47,12 +47,9 @@ namespace MS.Layers.Login
                 foreach (WZCanvasProperty canvas in nexon)
                 {
                     texEngine.AddTexture(canvas.Value);
-
-                    origin = (WZPointProperty)canvas["origin"];
-
                     texEngine.AddSize(canvas.Value.Width, canvas.Value.Height);
-
-                    texEngine.AddPos(origin.Value.X, origin.Value.Y);
+                    texEngine.AddOrigin(canvas);
+                    texEngine.AddPos(texEngine.Origin.Value.X, texEngine.Origin.Value.Y);
                 }
             }
 

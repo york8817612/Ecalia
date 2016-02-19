@@ -47,6 +47,8 @@
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Common\GameConstants.cs" />
     <Compile Include="Common\Imaging\CTextureEngine.cs" />
+    <Compile Include="Common\Imaging\DisplayOrder.cs" />
+    <Compile Include="Common\Imaging\Map\MapEngine.cs" />
     <Compile Include="Common\Net\ArrayReader.cs" />
     <Compile Include="Common\Net\ArrayWriter.cs" />
     <Compile Include="Common\Net\CNetwork.cs" />
