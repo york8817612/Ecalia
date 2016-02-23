@@ -1,13 +1,14 @@
 using System;
 using Cocos2D;
 using Microsoft.Xna.Framework;
-using reWZ.WZProperties;
+
 using System.IO;
 using System.Threading;
 using MS.Common.Imaging;
 using MS.Common.Net;
 using MS.Common;
 using System.Collections.Generic;
+using reWZ;
 
 namespace MS.Layers.Login
 {
@@ -16,11 +17,13 @@ namespace MS.Layers.Login
     /// </summary>
     public class CNexonLayer : CCLayer
     {
-        private WZPointProperty origin;
+        //private WZPointProperty origin;
         private CCTexture2D[] texture = new CCTexture2D[1024];
         private CCSprite[] sprite = new CCSprite[1024];
         private CCAnimation animation = new CCAnimation();
         private CCAnimate animate;
+
+        private CLogoEngine logoEngine;
 
         CTextureEngine texEngine = new CTextureEngine();
 
@@ -28,7 +31,15 @@ namespace MS.Layers.Login
 
         public CNexonLayer()
         {
-           
+            WZFile file = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true);
+            object uilock = new object();
+            lock (uilock)
+                logoEngine = new CLogoEngine(file);
+            
+            AddChild(logoEngine.Draw(true));
+
+            var next = new Thread(new ThreadStart(MoveToWizet));
+            next.Start();
         }
 
         ~CNexonLayer()
@@ -40,7 +51,7 @@ namespace MS.Layers.Login
 
         public override void OnEnter()
         {
-            using (reWZ.WZFile ui = new reWZ.WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true))
+            /*using (reWZ.WZFile ui = new reWZ.WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true))
             {
                 var nexon = ui.MainDirectory["Logo.img"]["Nexon"];
 
@@ -97,7 +108,7 @@ namespace MS.Layers.Login
             AddChild(sprite[0]);
 
             MoveToWizet();
-
+            */
             base.OnEnter();
         }
 

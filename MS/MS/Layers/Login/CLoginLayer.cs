@@ -8,12 +8,13 @@ using reWZ;
 using reWZ.WZProperties;
 using MS.Common.Imaging;
 using MS.Common;
+using MS.Common.Imaging.Map;
 
 namespace MS.Layers.Login
 {
-    public class CLoginLayer : CCSprite
+    public class CLoginLayer : CCLayer
     {
-        private Stack<CCSprite> test = new Stack<CCSprite>();
+        //private Stack<CCSprite> test = new Stack<CCSprite>();
         private CCTexture2D[] texture = new CCTexture2D[1024];
         private CCTexture2D[] backgrounds = new CCTexture2D[1024];
         private CCTexture2D[] foregrounds = new CCTexture2D[1024];
@@ -23,6 +24,7 @@ namespace MS.Layers.Login
         private CCAnimation animation = new CCAnimation();
         private CCAnimate animate;
         CTextureEngine texEngine = new CTextureEngine();
+        //CMapEngine mapEngine = new CMapEngine();
 
         private int FrameCount { get; set; }
 
@@ -58,12 +60,13 @@ namespace MS.Layers.Login
             using (ui)
             {
                 var frame = (WZCanvasProperty)ui.MainDirectory["Login.img"]["Common"]["frame"];
-                texEngine.AddTexture(frame.Value);
+                //mapEngine.AddForeground(frame.Value);
+                //texEngine.AddTexture(frame.Value);
                 texEngine.AddSize(frame.Value.Width, frame.Value.Height);
                 texEngine.AddOrigin(frame);
                 texEngine.AddPos(texEngine.Origin.Value.X, texEngine.Origin.Value.Y);
 
-                for (int t = 0; t < texEngine.Frame.Count; t++)
+               /*for (int t = 0; t < texEngine.Frame.Count; t++)
                 {
                     foregrounds[t] = new CCTexture2D();
                     foregrounds[t].InitWithTexture(texEngine.Frame[t]);
@@ -78,18 +81,19 @@ namespace MS.Layers.Login
                 for (int c = 0; c < texEngine.Frame.Count; c++)
                 {
                     AddChild(foreground[c], 0);
-                }
+                }*/
             }
 
             using (map)
             {
                 var lbk = (WZCanvasProperty)map.MainDirectory["Back"]["login.img"]["back"]["11"];
-                texEngine.AddTexture(lbk.Value);
+                //mapEngine.AddBackground(lbk.Value);
+                //texEngine.AddTexture(lbk.Value);
                 texEngine.AddSize(lbk.Value.Width, lbk.Value.Height);
                 texEngine.AddOrigin(lbk);
                 texEngine.AddPos(texEngine.Origin.Value.X, texEngine.Origin.Value.Y);
 
-                for (int t = 0; t < texEngine.Frame.Count; t++)
+                /*for (int t = 0; t < texEngine.Frame.Count; t++)
                 {
                     backgrounds[t] = new CCTexture2D();
                     backgrounds[t].InitWithTexture(texEngine.Frame[t]);
@@ -104,8 +108,10 @@ namespace MS.Layers.Login
                 for (int c = 0; c < texEngine.Frame.Count; c++)
                 {
                     AddChild(background[c], (int)DisplayOrder.BACKGROUND);
-                }
+                }*/
             }
+
+            //mapEngine.Draw();
 
             base.OnEnter();
         }

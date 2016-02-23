@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MS.Common.Imaging
 {
-    public class CTextureEngine
+    public class CTextureEngine : CCSprite
     {
         private List<Microsoft.Xna.Framework.Graphics.Texture2D> frames = new List<Microsoft.Xna.Framework.Graphics.Texture2D>();
         private List<int> Width_ = new List<int>();
@@ -37,6 +37,11 @@ namespace MS.Common.Imaging
 
         public void AddPos(float x, float y)
         {
+            if (x == 0)
+                x = 400;
+            else if (y == 0)
+                y = 300;
+
             X_.Add(x);
             Y_.Add(y);
         }

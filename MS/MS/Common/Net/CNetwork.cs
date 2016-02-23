@@ -20,6 +20,7 @@ namespace MS.Common.Net
         byte[] buffer = new byte[1024]; // This really isnt used in the end of the day...just need to initialize the reader
         ArrayReader reader;
         ArrayWriter writer;
+        byte[] key = { 0x13, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0xB4, 0x00, 0x00, 0x00, 0x1B, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x33, 0x00, 0x00, 0x00, 0x52, 0x00, 0x00, 0x00 };
         //ulong AESKey = 0x130806B41B0F3352;
         NetObjectClient client;
         
@@ -54,14 +55,25 @@ namespace MS.Common.Net
 
         private void CNetwork_OnReceived(object sender, NetReceivedEventArgs<byte[]> e)
         {
-            Console.WriteLine(ByteArrayToString(e.Data));
             reader = new ArrayReader(e.Data, e.Data.Length);
             FROM_SERVER header = (FROM_SERVER)reader.ReadShort();
             byte[] check;
 
             switch (header)
             {
+                case FROM_SERVER.LOGIN_STATUS:
+                    break;
                 case FROM_SERVER.CLIENT_HELLO:
+                    writer.WriteShort((short)TO_SERVER.LOGIN_PASSWORD);
+                    writer.WriteMapleString("admin");
+                    writer.WriteMapleString("admin");
+                    writer.WriteByte(0);
+                    writer.WriteByte(0);
+                    Crypto cry = new Crypto();
+                    Send(cry.Encrypt(writer.ToArray()));
+                    break;
+                default:
+                    Console.WriteLine("[Unhandled] Packet received: {0}", ByteArrayToString(e.Data));
                     break;
             }
         }
@@ -73,7 +85,7 @@ namespace MS.Common.Net
 
         private void CNetwork_OnConnected(object sender, NetConnectedEventArgs e)
         {
-            Console.WriteLine("Client has connected to server");
+            Console.WriteLine(e.ToString());
         }
 
         private byte[] SendHandShake()

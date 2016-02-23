@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Cocos2D;
 using MS.Common.Net;
 using MS.Common;
+using MS.Common.Imaging;
 
 namespace MS
 {
@@ -14,6 +15,7 @@ namespace MS
     {
         private readonly GraphicsDeviceManager graphics;
         private CNetwork network = new CNetwork(GameConstants.IP, GameConstants.LOGIN_PORT);
+        public CParallaxCamera camera = new CParallaxCamera();
 
         public MainGame()
         {
@@ -29,7 +31,6 @@ namespace MS
 
             CCApplication application = new AppDelegate(this, graphics);
             Components.Add(application);
-
             //network.Initialize();
         }
 

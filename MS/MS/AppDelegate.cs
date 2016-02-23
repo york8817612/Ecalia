@@ -80,7 +80,7 @@ namespace MS
         public override void ApplicationDidEnterBackground()
         {
             // stop all of the animation actions that are running.
-            CCDirector.SharedDirector.Pause();
+            //CCDirector.SharedDirector.Pause();
 
             // if you use SimpleAudioEngine, your music must be paused
             //CCSimpleAudioEngine.SharedEngine.PauseBackgroundMusic = true;
@@ -91,7 +91,7 @@ namespace MS
         /// </summary>
         public override void ApplicationWillEnterForeground()
         {
-            CCDirector.SharedDirector.Resume();
+            //CCDirector.SharedDirector.Resume();
 
             // if you use SimpleAudioEngine, your background music track must resume here. 
             //CCSimpleAudioEngine.SharedEngine.PauseBackgroundMusic = false;
