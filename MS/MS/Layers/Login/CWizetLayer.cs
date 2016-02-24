@@ -23,11 +23,23 @@ namespace MS.Layers.Login
         private int FrameCount { get; set; }
 
         CTextureEngine texEngine = new CTextureEngine();
+        CLogoEngine logoEngine;
 
 
         public CWizetLayer()
         {
+            WZFile ui = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true);
+            
+            object uilock = new object();
 
+            lock(uilock)
+                logoEngine = new CLogoEngine(ui);
+
+            AddChild(logoEngine.Draw(false));
+
+            var login = new Thread(new ThreadStart(MoveToLogin));
+            login.Start();
+            login.Join();
         }
 
         private void MoveToLogin()
@@ -59,6 +71,7 @@ namespace MS.Layers.Login
         public override void OnEnter()
         {
             base.OnEnter();
+            /*
             using (WZFile ui = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true))
             {
                 var wizet = ui.MainDirectory["Logo.img"]["Wizet"];
@@ -111,7 +124,7 @@ namespace MS.Layers.Login
 
             var login = new Thread(new ThreadStart(MoveToLogin));
             login.Start();
-            login.Join();
+            login.Join();*/
         }
 
         public override void OnExit()

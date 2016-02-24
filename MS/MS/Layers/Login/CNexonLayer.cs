@@ -40,6 +40,7 @@ namespace MS.Layers.Login
 
             var next = new Thread(new ThreadStart(MoveToWizet));
             next.Start();
+            next.Join();
         }
 
         ~CNexonLayer()
