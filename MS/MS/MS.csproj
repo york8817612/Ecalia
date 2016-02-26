@@ -46,14 +46,12 @@
   <ItemGroup>
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Common\GameConstants.cs" />
-    <Compile Include="Common\Imaging\CLogoEngine.cs" />
     <Compile Include="Common\Imaging\CParallaxCamera.cs" />
     <Compile Include="Common\Imaging\CTextureEngine.cs" />
     <Compile Include="Common\Imaging\DisplayOrder.cs" />
-    <Compile Include="Common\Imaging\Map\CBackgroundEngine.cs" />
+    <Compile Include="Common\Imaging\CEngine.cs" />
     <Compile Include="Common\Imaging\Map\CFoothold.cs" />
     <Compile Include="Common\Imaging\Map\CLife.cs" />
-    <Compile Include="Common\Imaging\Map\CMapEngine.cs" />
     <Compile Include="Common\Imaging\Map\CPortal.cs" />
     <Compile Include="Common\Imaging\Map\CSeat.cs" />
     <Compile Include="Common\Net\ArrayReader.cs" />
@@ -63,8 +61,6 @@
     <Compile Include="Common\Net\Opcodes.cs" />
     <Compile Include="Layers\Login\CLoginLayer.cs" />
     <Compile Include="Layers\Login\CWizetLayer.cs" />
-    <Compile Include="Layers\Map\CBackgroundLayer.cs" />
-    <Compile Include="Layers\Map\CForegroundLayer.cs" />
     <Compile Include="MainGame.cs" />
     <Compile Include="Layers\Login\CNexonLayer.cs" />
     <Compile Include="Program.cs" />
@@ -154,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Layers\Character\" />
+    <Folder Include="Layers\Map\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Deps\ms-reWZ-master\reWZ.csproj">
@@ -163,10 +160,6 @@
     <ProjectReference Include="..\..\..\Deps\netsockets\NetSockets\NetSockets.csproj">
       <Project>{bd34bebb-9ee0-4d18-b504-c2f522925642}</Project>
       <Name>NetSockets</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Helpers\wzmapeditor-master\WZ.NET\WZ.NET.csproj">
-      <Project>{98fd779a-dab1-4031-9758-95d455750088}</Project>
-      <Name>WZ.NET</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

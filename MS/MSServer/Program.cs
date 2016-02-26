@@ -1,4 +1,5 @@
-﻿using NetSockets;
+﻿using DarkMapleLib.Helpers;
+using NetSockets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,12 @@ namespace MSServer
     class Program
     {
         private static NetObjectServer server = new NetObjectServer();
+        private static ArrayWriter writer = new ArrayWriter();
+        private static Array reader;
 
         static void Main(string[] args)
         {
+            server.EchoMode = NetEchoMode.EchoAll;
             server.OnClientAccepted += Server_OnClientAccepted;
             server.OnClientConnected += Server_OnClientConnected;
             server.OnClientDisconnected += Server_OnClientDisconnected;
@@ -34,7 +38,7 @@ namespace MSServer
 
         private static void Server_OnStarted(object sender, NetStartedEventArgs e)
         {
-            write("[Server] has started listening to port {0}", server.Port);
+            write("[Server] has started listening to {0}:{1}", server.Address, server.Port);
         }
 
         private static void Server_OnReceived(object sender, NetClientReceivedEventArgs<NetObject> e)
@@ -60,6 +64,12 @@ namespace MSServer
         private static void Server_OnClientConnected(object sender, NetClientConnectedEventArgs e)
         {
             write("[Client] has connected");
+
+            writer.WriteShort(14);
+            writer.WriteShort(62);
+            writer.WriteMapleString("1");
+            NetObject obj = new NetObject("GetHello", writer.ToArray());
+            server.DispatchTo(e.Guid, obj);
         }
 
         private static void Server_OnClientAccepted(object sender, NetClientAcceptedEventArgs e)
