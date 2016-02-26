@@ -47,7 +47,6 @@
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Common\GameConstants.cs" />
     <Compile Include="Common\Imaging\CParallaxCamera.cs" />
-    <Compile Include="Common\Imaging\CTextureEngine.cs" />
     <Compile Include="Common\Imaging\DisplayOrder.cs" />
     <Compile Include="Common\Imaging\CEngine.cs" />
     <Compile Include="Common\Imaging\Map\CFoothold.cs" />
