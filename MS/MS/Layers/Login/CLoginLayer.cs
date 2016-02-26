@@ -14,13 +14,13 @@ namespace MS.Layers.Login
 {
     public class CLoginLayer : CCLayer
     {
-        
+        CTextureEngine tex = new CTextureEngine();
 
         private int FrameCount { get; set; }
 
         public CLoginLayer()
         {
-
+            
         }
 
         public override void Update(float dt)
