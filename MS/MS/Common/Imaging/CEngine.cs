@@ -265,11 +265,19 @@ namespace MS.Common.Imaging
         private List<System.Drawing.Bitmap> ObjImg = new List<System.Drawing.Bitmap>();
         private WZFile map = new WZFile(GameConstants.FileLocation + GameConstants.MAP, GameConstants.Variant, true);
 
-        public CObjectEngine(string imgName, string l0, string l1, string l2)
+        public CObjectEngine(string oS, string l0, string l1, string l2)
         {
-            var CanvasObjs = (WZCanvasProperty)map.MainDirectory["Obj"][imgName + ".img"][l0][l1][l2];
-            ObjImg.Add(CanvasObjs.Value);
-            AddPos(((WZPointProperty)CanvasObjs["origin"]).Value.X, ((WZPointProperty)CanvasObjs["origin"]).Value.Y);
+            Console.WriteLine(oS + " " + l0 + " " + l1 + " " + l2);
+            if (oS != null && l0 != null && l1 != null && l2 != null)
+            {
+                var objs = (WZSubProperty)map.MainDirectory["Obj"][oS + ".img"][l0][l1][l2];
+
+                foreach (WZCanvasProperty CanvasObjs in objs)
+                {
+                    ObjImg.Add(CanvasObjs.Value);
+                    AddPos(((WZPointProperty)CanvasObjs["origin"]).Value.X, ((WZPointProperty)CanvasObjs["origin"]).Value.Y);
+                }
+            }
         }
 
         public CCSprite Draw()
@@ -406,63 +414,6 @@ namespace MS.Common.Imaging
     /// </summary>
     public class CMapEngine
     {
-        private CMapStruct ms = new CMapStruct();
-        
-
-        public CMapStruct MapStruct
-        {
-            get { return ms; }
-        }
-
-        public CMapEngine(WZFile mapFile)
-        {
-            if (mapFile.ToString() == "UI.wz")
-            {
-                foreach (WZImage WzImg in mapFile.MainDirectory)
-                {
-                    if (WzImg.Name == "MapLogin.img")
-                    {
-                        foreach (WZSubProperty WzSub in WzImg)
-                        {
-                            if (WzSub.HasChild("obj"))
-                            {
-                                foreach (WZSubProperty obj in WzSub)
-                                {
-                                    if (obj.HasChild("f"))
-                                        ms.F = obj["f"].ValueOrDie<int>();
-                                    if (obj.HasChild("l0"))
-                                        ms.L0 = obj["l0"].ValueOrDie<string>();
-                                    if (obj.HasChild("l1"))
-                                        ms.L1 = obj["l1"].ValueOrDie<string>();
-                                    if (obj.HasChild("l2"))
-                                        ms.L2 = obj["l2"].ValueOrDie<string>();
-                                    if (obj.HasChild("oS"))
-                                        ms.OS = obj["oS"].ValueOrDie<string>();
-                                    if (obj.HasChild("x"))
-                                        ms.X = obj["x"].ValueOrDie<int>();
-                                    if (obj.HasChild("y"))
-                                        ms.Y = obj["y"].ValueOrDie<int>();
-                                    // add zM here ( I have no effing idea what zM even is.... so give me some time....)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-
-            }
-        }
-    }
-
-    #region MapStruct
-
-    /// <summary>
-    /// Contains all the information of the maps
-    /// </summary>
-    public struct CMapStruct
-    {
 
         private int id;
         private int forceReturn;
@@ -478,8 +429,8 @@ namespace MS.Common.Imaging
         private int weatherId;
         private string weatherMessage;
         private bool weatherAdmin;
-        private string bS;
-        private string tS;
+        private string bS, // background set
+        tS; // tile set
         private int a, // Alpha?
          ani,
          cx, // CenterX
@@ -509,96 +460,503 @@ namespace MS.Common.Imaging
             set { ani = value; }
         }
 
+        /// <summary>
+        /// CenterX
+        /// </summary>
         public int CX
         {
             get { return cx; }
             set { cx = value; }
         }
 
+        /// <summary>
+        /// CenterY
+        /// </summary>
         public int CY
         {
             get { return cy; }
             set { cy = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int F
         {
             get { return f; }
             set { f = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int Front
         {
             get { return front; }
             set { front = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int NO
         {
             get { return no; }
             set { no = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int RX
         {
             get { return rx; }
             set { rx = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int RY
         {
             get { return ry; }
             set { ry = value; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int Type
         {
             get { return type; }
             set { type = value; }
         }
 
+        /// <summary>
+        /// Position X
+        /// </summary>
         public int X
         {
             get { return x; }
             set { x = value; }
         }
 
+        /// <summary>
+        /// Position Y
+        /// </summary>
         public int Y
         {
             get { return y; }
             set { y = value; }
         }
 
+        /// <summary>
+        /// First Sub
+        /// </summary>
         public string L0
         {
             get { return l0; }
             set { l0 = value; }
         }
 
+        /// <summary>
+        /// Second Sub
+        /// </summary>
         public string L1
         {
             get { return l1; }
             set { l1 = value; }
         }
 
+        /// <summary>
+        /// Third sub (the WZCanvas)
+        /// </summary>
         public string L2
         {
             get { return l2; }
             set { l2 = value; }
         }
 
+        /// <summary>
+        /// Obj Image name without .img
+        /// </summary>
         public string OS
         {
             get { return oS; }
             set { oS = value; }
         }
 
+        /// <summary>
+        /// ID of map
+        /// </summary>
         public int ID
         {
             get { return id; }
             set { id = value; }
         }
 
+        /// <summary>
+        /// Force Return of map
+        /// </summary>
+        public int ForceReturn
+        {
+            get { return forceReturn; }
+            set { forceReturn = value; }
+        }
+
+        public int ReturnMap
+        {
+            get { return returnMap; }
+            set { returnMap = value; }
+        }
+
+        public bool Town
+        {
+            get { return town; }
+            set { town = value; }
+        }
+
+        public bool HasClock
+        {
+            get { return hasClock; }
+            set { hasClock = value; }
+        }
+
+        public byte FieldType
+        {
+            get { return fieldType; }
+            set { fieldType = value; }
+        }
+
+        public bool Fly
+        {
+            get { return fly; }
+            set { fly = value; }
+        }
+
+        public bool Swim
+        {
+            get { return swim; }
+            set { swim = value; }
+        }
+
+        public int MobRate
+        {
+            get { return mobRate; }
+            set { mobRate = value; }
+        }
+
+        public string OnFirstUserEnter
+        {
+            get { return onFirstUserEnter; }
+            set { onFirstUserEnter = value; }
+        }
+
+        public string OnUserEnter
+        {
+            get { return onUserEnter; }
+            set { onUserEnter = value; }
+        }
+
+        public int WeatherID
+        {
+            get { return weatherId; }
+            set { weatherId = value; }
+        }
+
+        public string WeatherMessage
+        {
+            get { return weatherMessage; }
+            set { weatherMessage = value; }
+        }
+
+        public bool WeatherAdmin
+        {
+            get { return weatherAdmin; }
+            set { weatherAdmin = value; }
+        }
+
+        public string BS
+        {
+            get { return bS; }
+            set { bS = value; }
+        }
+
+        public CMapEngine(WZFile mapFile, bool login)
+        {
+            if (login)
+            {
+                foreach (WZImage WzImg in mapFile.MainDirectory)
+                {
+                    if (WzImg.Name == "MapLogin.img")
+                    {
+                        foreach (WZSubProperty WzSub in WzImg)
+                        {
+                            //Console.WriteLine(WzSub.Name);
+                            foreach (var objs in WzSub)
+                            {
+                                foreach (var obj in objs)
+                                {
+                                    //Console.WriteLine(obj.Name);
+                                    if (obj.HasChild("f"))
+                                        f = obj["f"].ValueOrDie<int>();
+                                    if (obj.HasChild("l0"))
+                                        l0 = obj["l0"].ValueOrDefault<string>("its empty");
+                                    if (obj.HasChild("l1"))
+                                        l1 = obj["l1"].ValueOrDie<string>();
+                                    if (obj.HasChild("l2"))
+                                        l2 = obj["l2"].ValueOrDie<string>();
+                                    if (obj.HasChild("oS"))
+                                        oS = obj["oS"].ValueOrDie<string>();
+                                    if (obj.HasChild("x"))
+                                        x = obj["x"].ValueOrDie<int>();
+                                    if (obj.HasChild("y"))
+                                        y = obj["y"].ValueOrDie<int>();
+                                    if (obj.HasChild("cx"))
+                                        cx = obj["cx"].ValueOrDie<int>();
+                                    if (obj.HasChild("cy"))
+                                        cy = obj["cy"].ValueOrDie<int>();
+                                    if (obj.HasChild("bS"))
+                                        bS = obj["bS"].ValueOrDie<string>();
+                                    if (obj.HasChild("a"))
+                                        a = obj["a"].ValueOrDie<int>();
+                                    if (obj.HasChild("ani"))
+                                        ani = obj["ani"].ValueOrDie<int>();
+                                    if (obj.HasChild("front"))
+                                        front = obj["front"].ValueOrDie<int>();
+                                    if (obj.HasChild("rx"))
+                                        rx = obj["rx"].ValueOrDie<int>();
+                                    if (obj.HasChild("ry"))
+                                        ry = obj["ry"].ValueOrDie<int>();
+                                    if (obj.HasChild("no"))
+                                        no = obj["no"].ValueOrDie<int>();
+                                    if (obj.HasChild("type"))
+                                        type = obj["type"].ValueOrDie<int>();
+                                    /*if (obj.HasChild("zM"))
+                                        Console.WriteLine("Has child");*/
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            else
+            {
+
+            }
+        }
+
+        public void test()
+        {
+            Console.WriteLine(l0);
+        }
+
+        public CCSprite DrawObj()
+        {
+
+            CObjectEngine objEngine = new CObjectEngine(OS, L0, L1, L2);
+
+            return objEngine.Draw();
+        }
+
+        private void Write(string msg, params object[] obj)
+        {
+            Console.WriteLine(msg, obj);
+        }
+    }
+
+    #region MapStruct
+
+    /// <summary>
+    /// Contains all the information of the maps
+    /// </summary>
+    public struct CMapStruct
+    {
+
+        private int id;
+        private int forceReturn;
+        private int returnMap;
+        private bool town;
+        private bool hasClock;
+        private byte fieldType;
+        private bool fly;
+        private bool swim;
+        private int mobRate;
+        private string onFirstUserEnter;
+        private string onUserEnter;
+        private int weatherId;
+        private string weatherMessage;
+        private bool weatherAdmin;
+        private string bS, // background set
+        tS; // tile set
+        private int a, // Alpha?
+         ani,
+         cx, // CenterX
+         cy, // CenterY
+         f, // 
+         front, // 
+         no, // 
+         rx, // 
+         ry, // 
+         type, // 
+         x, // Position X
+            y; // Position Y
+        private string l0, // First Sub
+            l1, // Second Sub
+            l2, // Third Sub
+            oS; // Obj Img Name without the .img
+
+        public int A
+        {
+            get { return a; }
+            set { a = value; }
+        }
+
+        public int Ani
+        {
+            get { return ani; }
+            set { ani = value; }
+        }
+
+        /// <summary>
+        /// CenterX
+        /// </summary>
+        public int CX
+        {
+            get { return cx; }
+            set { cx = value; }
+        }
+
+        /// <summary>
+        /// CenterY
+        /// </summary>
+        public int CY
+        {
+            get { return cy; }
+            set { cy = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int F
+        {
+            get { return f; }
+            set { f = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Front
+        {
+            get { return front; }
+            set { front = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int NO
+        {
+            get { return no; }
+            set { no = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int RX
+        {
+            get { return rx; }
+            set { rx = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int RY
+        {
+            get { return ry; }
+            set { ry = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Type
+        {
+            get { return type; }
+            set { type = value; }
+        }
+
+        /// <summary>
+        /// Position X
+        /// </summary>
+        public int X
+        {
+            get { return x; }
+            set { x = value; }
+        }
+
+        /// <summary>
+        /// Position Y
+        /// </summary>
+        public int Y
+        {
+            get { return y; }
+            set { y = value; }
+        }
+
+        /// <summary>
+        /// First Sub
+        /// </summary>
+        public string L0
+        {
+            get { return l0; }
+            set { l0 = value; }
+        }
+
+        /// <summary>
+        /// Second Sub
+        /// </summary>
+        public string L1
+        {
+            get { return l1; }
+            set { l1 = value; }
+        }
+
+        /// <summary>
+        /// Third sub (the WZCanvas)
+        /// </summary>
+        public string L2
+        {
+            get { return l2; }
+            set { l2 = value; }
+        }
+
+        /// <summary>
+        /// Obj Image name without .img
+        /// </summary>
+        public string OS
+        {
+            get { return oS; }
+            set { oS = value; }
+        }
+
+        /// <summary>
+        /// ID of map
+        /// </summary>
+        public int ID
+        {
+            get { return id; }
+            set { id = value; }
+        }
+
+        /// <summary>
+        /// Force Return of map
+        /// </summary>
         public int ForceReturn
         {
             get { return forceReturn; }

@@ -15,7 +15,10 @@ namespace MS
     {
         private readonly GraphicsDeviceManager graphics;
         private CNetwork network = new CNetwork(GameConstants.IP, GameConstants.LOGIN_PORT);
-        public CParallaxCamera camera = new CParallaxCamera();
+        Vector3 camPos = new Vector3(0, 0, 0);
+        float leftRight = MathHelper.PiOver2;
+        float upDown = -MathHelper.PiOver2;
+        const float moveSpeed = 30.0f;
 
         public MainGame()
         {
@@ -55,9 +58,10 @@ namespace MS
                 ProcessBackClick();
             }
 
-            // TODO: Add your update logic here
+            if (CCDirector.SharedDirector.RunningScene != null)
+            {
 
-
+            }
             base.Update(gameTime);
         }
 

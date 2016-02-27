@@ -14,13 +14,14 @@ namespace MS.Layers.Login
 {
     public class CLoginLayer : CCLayer
     {
-        //CTextureEngine tex = new CTextureEngine();
-
         private int FrameCount { get; set; }
 
         public CLoginLayer()
         {
-            var map = new WZFile(GameConstants.FileLocation + @GameConstants.MAP, GameConstants.Variant, true);
+            var map = new WZFile(GameConstants.FileLocation + @GameConstants.UI, GameConstants.Variant, true);
+            CMapEngine mapEngine = new CMapEngine(map, true);
+            //mapEngine.test();
+            AddChild(mapEngine.DrawObj());
         }
 
         public override void Update(float dt)
@@ -44,6 +45,9 @@ namespace MS.Layers.Login
 
         public override void OnEnter()
         {
+            if (Camera.Dirty)
+                Camera.Restore();
+
             base.OnEnter();
         }
 
