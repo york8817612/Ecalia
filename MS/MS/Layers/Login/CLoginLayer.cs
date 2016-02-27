@@ -14,17 +14,13 @@ namespace MS.Layers.Login
 {
     public class CLoginLayer : CCLayer
     {
-        CTextureEngine tex = new CTextureEngine();
+        //CTextureEngine tex = new CTextureEngine();
 
         private int FrameCount { get; set; }
 
         public CLoginLayer()
         {
             var map = new WZFile(GameConstants.FileLocation + @GameConstants.MAP, GameConstants.Variant, true);
-            CBackgroundEngine bk = new CBackgroundEngine(map, "login");
-            CForegroundEngine fg = new CForegroundEngine(map);
-            AddChild(bk.Draw(), (int)DisplayOrder.BACKGROUND);
-            AddChild(fg.DrawFrame(), (int)DisplayOrder.FOREGOUND);
         }
 
         public override void Update(float dt)

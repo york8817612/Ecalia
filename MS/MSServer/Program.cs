@@ -10,7 +10,7 @@ namespace MSServer
 {
     class Program
     {
-        private static NetObjectServer server = new NetObjectServer();
+        private static NetServer server = new NetServer();
         private static ArrayWriter writer = new ArrayWriter();
         private static Array reader;
 
@@ -31,6 +31,11 @@ namespace MSServer
             while (Console.ReadKey().Key == ConsoleKey.Escape) ;
         }
 
+        private static void Server_OnReceived(object sender, NetClientReceivedEventArgs<byte[]> e)
+        {
+            throw new NotImplementedException();
+        }
+
         private static void Server_OnStopped(object sender, NetStoppedEventArgs e)
         {
             throw new NotImplementedException();
@@ -39,11 +44,6 @@ namespace MSServer
         private static void Server_OnStarted(object sender, NetStartedEventArgs e)
         {
             write("[Server] has started listening to {0}:{1}", server.Address, server.Port);
-        }
-
-        private static void Server_OnReceived(object sender, NetClientReceivedEventArgs<NetObject> e)
-        {
-            throw new NotImplementedException();
         }
 
         private static void Server_OnError(object sender, NetExceptionEventArgs e)
@@ -58,28 +58,33 @@ namespace MSServer
 
         private static void Server_OnClientDisconnected(object sender, NetClientDisconnectedEventArgs e)
         {
-            throw new NotImplementedException();
+            write("[Client] Disconnected from server. \nReason: {0}", e.Reason);
         }
 
         private static void Server_OnClientConnected(object sender, NetClientConnectedEventArgs e)
         {
-            write("[Client] has connected");
+            write("[Client] has connected \nGuid: {0} ", ByteArrayToString(e.Guid.ToByteArray()));
 
-            writer.WriteShort(14);
-            writer.WriteShort(62);
-            writer.WriteMapleString("1");
-            NetObject obj = new NetObject("GetHello", writer.ToArray());
-            server.DispatchTo(e.Guid, obj);
+            writer.WriteShort(0x0D);
+            writer.WriteShort(0x63);
+            writer.WriteMapleString("2");
+            server.DispatchTo(e.Guid, writer.ToArray());
         }
 
         private static void Server_OnClientAccepted(object sender, NetClientAcceptedEventArgs e)
         {
-            throw new NotImplementedException();
+
         }
 
         private static void write(string msg, params object[]  obj)
         {
             Console.WriteLine(msg, obj);
+        }
+
+        private static string ByteArrayToString(byte[] ba)
+        {
+            string hex = BitConverter.ToString(ba);
+            return hex.Replace("-", " ");
         }
     }
 }

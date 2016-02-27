@@ -32,6 +32,7 @@ namespace MS
             CCApplication application = new AppDelegate(this, graphics);
             Components.Add(application);
             //network.Initialize();
+            
         }
 
         private void ProcessBackClick()

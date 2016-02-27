@@ -57,20 +57,20 @@ namespace MS.Common.Net
         {
             reader = new ArrayReader(e.Data, e.Data.Length);
             FROM_SERVER header = (FROM_SERVER)reader.ReadShort();
-            byte[] check;
 
             switch (header)
             {
                 case FROM_SERVER.LOGIN_STATUS:
                     break;
                 case FROM_SERVER.CLIENT_HELLO:
-                    writer.WriteShort((short)TO_SERVER.LOGIN_PASSWORD);
-                    writer.WriteMapleString("admin");
-                    writer.WriteMapleString("admin");
-                    writer.WriteByte(0);
-                    writer.WriteByte(0);
-                    Crypto cry = new Crypto();
-                    Send(cry.Encrypt(writer.ToArray()));
+                    var version = reader.ReadShort();
+                    var patch = reader.ReadMapleString();
+
+                    if (version != (short)GameConstants.MAJOR_VERSION && patch != GameConstants.MINOR_VERSION)
+                    {
+                        Disconnect(NetStoppedReason.Exception);
+                        Environment.Exit(0);
+                    }
                     break;
                 default:
                     Console.WriteLine("[Unhandled] Packet received: {0}", ByteArrayToString(e.Data));

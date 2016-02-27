@@ -10,10 +10,13 @@ using System.Threading.Tasks;
 
 namespace MS.Common.Imaging
 {
+
+    #region Logo Engine
+
     /// <summary>
     /// Handles the Logos in the beginning of the client process
     /// </summary>
-    public class CLogoEngine
+    public class CLogoEngine : CTextureEngine
     {
         private int width, height;
         private float x, y;
@@ -24,7 +27,7 @@ namespace MS.Common.Imaging
         private List<float> PosY = new List<float>();
         private List<int> imageWidth = new List<int>();
         private List<int> imageHeight = new List<int>();
-        private CTextureEngine tex = new CTextureEngine();
+       // private CTextureEngine tex = new CTextureEngine();
         private WZFile ui;
 
         public int Width
@@ -160,7 +163,7 @@ namespace MS.Common.Imaging
                     if (!GameConstants.GREATER_VERSION)
                     {
                         CCTexture2D texture = new CCTexture2D();
-                        texture.InitWithTexture(tex.GetTexture(nxLogo));
+                        texture.InitWithTexture(GetTexture(nxLogo));
 
                         CCSprite sprite = new CCSprite(texture);
                         sprite.SetPosition(X, Y);
@@ -177,7 +180,7 @@ namespace MS.Common.Imaging
                         for (int i = 0; i < NexonCount; i++)
                         {
                             Textures[i] = new CCTexture2D();
-                            Textures[i].InitWithTexture(tex.GetTexture(nexonImage[i]));
+                            Textures[i].InitWithTexture(GetTexture(nexonImage[i]));
                         }
 
                         for (int i = 0; i < NexonCount; i++)
@@ -209,7 +212,7 @@ namespace MS.Common.Imaging
                     for (int i = 0; i < WizetCount; i++)
                     {
                         Textures[i] = new CCTexture2D();
-                        Textures[i].InitWithTexture(tex.GetTexture(wizetImage[i]));
+                        Textures[i].InitWithTexture(GetTexture(wizetImage[i]));
                     }
 
 
@@ -253,34 +256,75 @@ namespace MS.Common.Imaging
         }
     }
 
+    #endregion
+
+    #region Object Engine
+
+    public class CObjectEngine : CTextureEngine
+    {
+        private List<System.Drawing.Bitmap> ObjImg = new List<System.Drawing.Bitmap>();
+        private WZFile map = new WZFile(GameConstants.FileLocation + GameConstants.MAP, GameConstants.Variant, true);
+
+        public CObjectEngine(string imgName, string l0, string l1, string l2)
+        {
+            var CanvasObjs = (WZCanvasProperty)map.MainDirectory["Obj"][imgName + ".img"][l0][l1][l2];
+            ObjImg.Add(CanvasObjs.Value);
+            AddPos(((WZPointProperty)CanvasObjs["origin"]).Value.X, ((WZPointProperty)CanvasObjs["origin"]).Value.Y);
+        }
+
+        public CCSprite Draw()
+        {
+            CCTexture2D[] texture = new CCTexture2D[ObjImg.Count];
+            CCSprite[] spr = new CCSprite[ObjImg.Count];
+
+            for (int i = 0; i < ObjImg.Count; i++)
+            {
+                texture[i] = new CCTexture2D();
+                texture[i].InitWithTexture(GetTexture(ObjImg[i]));
+
+                spr[i] = new CCSprite(texture[i]);
+                spr[i].SetPosition(X[i], Y[i]);
+            }
+
+            for (int i = 1; i < ObjImg.Count; i++)
+            {
+                spr[0].AddChild(spr[i]);
+            }
+
+            return spr[0];
+        }
+    }
+
+    #endregion
+
+    #region Background Engine
+
     /// <summary>
     /// Handles the drawing of backgrounds for the login and maps
     /// </summary>
-    public class CBackgroundEngine
+    public class CBackgroundEngine : CTextureEngine
     {
         private List<System.Drawing.Bitmap> Layers = new List<System.Drawing.Bitmap>(8);
-        private CTextureEngine tex = new CTextureEngine();
+        //private CTextureEngine tex = new CTextureEngine();
 
         /// <summary>
         /// Locates the background using the WZ file and the name of the map without the .img
         /// </summary>
         /// <param name="file">WZ file with background</param>
         /// <param name="name">Name of the background without .img</param>
-        public CBackgroundEngine(WZFile file, string name)
+        public CBackgroundEngine(WZImage file)
         {
-            var mT = file.MainDirectory["Back"][name + ".img"]["back"];
+            WZSubProperty mT = (WZSubProperty)file["back"];
+            foreach (WZCanvasProperty prop in mT)
+            {
+                Layers.Add(prop.Value);
 
-            if (name == "login")
-            {
-                Layers.Add(((WZCanvasProperty)mT["11"]).Value);
-            }
-            else
-            {
-                for (int i = 0; i < Layers.Capacity; i++)
+                for (int i = 0; i < mT.ChildCount; i++)
                 {
-                    Layers.Add(((WZCanvasProperty)mT[i.ToString()]).Value);
+                    AddPos(((WZPointProperty)prop["origin"]).Value.X, ((WZPointProperty)prop["origin"]).Value.Y);
                 }
             }
+
         }
 
         /// <summary>
@@ -289,29 +333,41 @@ namespace MS.Common.Imaging
         /// <returns></returns>
         public CCSprite Draw()
         {
-            CCTexture2D[] texture = new CCTexture2D[Layers.Capacity];
-            CCSprite[] sprite = new CCSprite[Layers.Capacity];
-
+            CCTexture2D[] texture = new CCTexture2D[Layers.Count];
+            CCSprite[] sprite = new CCSprite[Layers.Count];
+            Console.WriteLine(Layers.Count);
             for (int i = 0; i < Layers.Count; i++)
             {
                 texture[i] = new CCTexture2D();
-                texture[i].InitWithTexture(tex.GetTexture(Layers[i]));
+                texture[i].InitWithTexture(GetTexture(Layers[i]));
+            }
 
+            for (int i = 0; i < Layers.Count; i++)
+            {
                 sprite[i] = new CCSprite(texture[i]);
-                sprite[i].SetPosition(400, 300);
+                sprite[i].SetPosition(X[i], Y[i]);
+            }
+
+            for (int i = 1; i < Layers.Count; i++)
+            {
+                sprite[0].AddChild(sprite[i], i);
             }
 
             return sprite[0];
         }
     }
 
+    #endregion
+
+    #region Foreground Engine
+
     /// <summary>
     /// Handles drawing the foreground for the login and maps
     /// </summary>
-    public class CForegroundEngine
+    public class CForegroundEngine : CTextureEngine
     {
         private List<System.Drawing.Bitmap> Layers = new List<System.Drawing.Bitmap>(8);
-        private CTextureEngine tex = new CTextureEngine();
+        //private CTextureEngine tex = new CTextureEngine();
 
         /// <summary>
         /// Locates the foreground
@@ -332,7 +388,7 @@ namespace MS.Common.Imaging
             var frLoc = (WZCanvasProperty)ui.MainDirectory["Login.img"]["Common"]["frame"];
 
             CCTexture2D texFr = new CCTexture2D();
-            texFr.InitWithTexture(tex.GetTexture(frLoc.Value));
+            texFr.InitWithTexture(GetTexture(frLoc.Value));
 
             CCSprite spr = new CCSprite(texFr);
             spr.SetPosition(400, 300);
@@ -341,17 +397,66 @@ namespace MS.Common.Imaging
         }
     }
 
+    #endregion
+
+    #region Map Engine
+
     /// <summary>
     /// Puts the maps completely together using the Foreground Engine and the Background Engine
     /// </summary>
     public class CMapEngine
     {
+        private CMapStruct ms = new CMapStruct();
+        
+
+        public CMapStruct MapStruct
+        {
+            get { return ms; }
+        }
 
         public CMapEngine(WZFile mapFile)
         {
+            if (mapFile.ToString() == "UI.wz")
+            {
+                foreach (WZImage WzImg in mapFile.MainDirectory)
+                {
+                    if (WzImg.Name == "MapLogin.img")
+                    {
+                        foreach (WZSubProperty WzSub in WzImg)
+                        {
+                            if (WzSub.HasChild("obj"))
+                            {
+                                foreach (WZSubProperty obj in WzSub)
+                                {
+                                    if (obj.HasChild("f"))
+                                        ms.F = obj["f"].ValueOrDie<int>();
+                                    if (obj.HasChild("l0"))
+                                        ms.L0 = obj["l0"].ValueOrDie<string>();
+                                    if (obj.HasChild("l1"))
+                                        ms.L1 = obj["l1"].ValueOrDie<string>();
+                                    if (obj.HasChild("l2"))
+                                        ms.L2 = obj["l2"].ValueOrDie<string>();
+                                    if (obj.HasChild("oS"))
+                                        ms.OS = obj["oS"].ValueOrDie<string>();
+                                    if (obj.HasChild("x"))
+                                        ms.X = obj["x"].ValueOrDie<int>();
+                                    if (obj.HasChild("y"))
+                                        ms.Y = obj["y"].ValueOrDie<int>();
+                                    // add zM here ( I have no effing idea what zM even is.... so give me some time....)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
 
+            }
         }
     }
+
+    #region MapStruct
 
     /// <summary>
     /// Contains all the information of the maps
@@ -375,6 +480,118 @@ namespace MS.Common.Imaging
         private bool weatherAdmin;
         private string bS;
         private string tS;
+        private int a, // Alpha?
+         ani,
+         cx, // CenterX
+         cy, // CenterY
+         f, // 
+         front, // 
+         no, // 
+         rx, // 
+         ry, // 
+         type, // 
+         x, // Position X
+            y; // Position Y
+        private string l0, // First Sub
+            l1, // Second Sub
+            l2, // Third Sub
+            oS; // Obj Img Name without the .img
+
+        public int A
+        {
+            get { return a; }
+            set { a = value; }
+        }
+
+        public int Ani
+        {
+            get { return ani; }
+            set { ani = value; }
+        }
+
+        public int CX
+        {
+            get { return cx; }
+            set { cx = value; }
+        }
+
+        public int CY
+        {
+            get { return cy; }
+            set { cy = value; }
+        }
+
+        public int F
+        {
+            get { return f; }
+            set { f = value; }
+        }
+
+        public int Front
+        {
+            get { return front; }
+            set { front = value; }
+        }
+
+        public int NO
+        {
+            get { return no; }
+            set { no = value; }
+        }
+
+        public int RX
+        {
+            get { return rx; }
+            set { rx = value; }
+        }
+
+        public int RY
+        {
+            get { return ry; }
+            set { ry = value; }
+        }
+
+        public int Type
+        {
+            get { return type; }
+            set { type = value; }
+        }
+
+        public int X
+        {
+            get { return x; }
+            set { x = value; }
+        }
+
+        public int Y
+        {
+            get { return y; }
+            set { y = value; }
+        }
+
+        public string L0
+        {
+            get { return l0; }
+            set { l0 = value; }
+        }
+
+        public string L1
+        {
+            get { return l1; }
+            set { l1 = value; }
+        }
+
+        public string L2
+        {
+            get { return l2; }
+            set { l2 = value; }
+        }
+
+        public string OS
+        {
+            get { return oS; }
+            set { oS = value; }
+        }
 
         public int ID
         {
@@ -472,7 +689,16 @@ namespace MS.Common.Imaging
         }
     }
 
-    public class CTextureEngine : CCSprite
+    #endregion
+
+    #endregion
+
+    #region Texture Engine
+
+    /// <summary>
+    /// Handles the creation of textures
+    /// </summary>
+    public abstract class CTextureEngine
     {
         private List<Microsoft.Xna.Framework.Graphics.Texture2D> frames = new List<Microsoft.Xna.Framework.Graphics.Texture2D>();
         private List<int> Width_ = new List<int>();
@@ -500,11 +726,6 @@ namespace MS.Common.Imaging
 
         public void AddPos(float x, float y)
         {
-            if (x == 0)
-                x = 400;
-            else if (y == 0)
-                y = 300;
-
             X_.Add(x);
             Y_.Add(y);
         }
@@ -580,4 +801,6 @@ namespace MS.Common.Imaging
             return tex;
         }
     }
+
+    #endregion
 }

@@ -22,7 +22,7 @@ namespace MS.Layers.Login
 
         private int FrameCount { get; set; }
 
-        CTextureEngine texEngine = new CTextureEngine();
+        //CTextureEngine texEngine = new CTextureEngine();
         CLogoEngine logoEngine;
 
 
