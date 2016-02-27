@@ -312,27 +312,33 @@ namespace MS.Common.Imaging
     /// </summary>
     public class CBackgroundEngine : CTextureEngine
     {
-        private List<System.Drawing.Bitmap> Layers = new List<System.Drawing.Bitmap>(8);
-        //private CTextureEngine tex = new CTextureEngine();
+        private List<System.Drawing.Bitmap> Layers = new List<System.Drawing.Bitmap>();
+        private WZFile mapFile = new WZFile(GameConstants.FileLocation + GameConstants.MAP, GameConstants.Variant, true);
 
         /// <summary>
         /// Locates the background using the WZ file and the name of the map without the .img
         /// </summary>
         /// <param name="file">WZ file with background</param>
         /// <param name="name">Name of the background without .img</param>
-        public CBackgroundEngine(WZImage file)
+        public CBackgroundEngine(string bS, int cx, int cy, int rx, int ry, List<int> no, bool ani)
         {
-            WZSubProperty mT = (WZSubProperty)file["back"];
-            foreach (WZCanvasProperty prop in mT)
-            {
-                Layers.Add(prop.Value);
+            var bk = mapFile.MainDirectory["Back"][bS + ".img"][ani ? "ani" : "back"];
 
-                for (int i = 0; i < mT.ChildCount; i++)
+            foreach (WZCanvasProperty Img in bk)
+            {
+                foreach (int node in no)
                 {
-                    AddPos(((WZPointProperty)prop["origin"]).Value.X, ((WZPointProperty)prop["origin"]).Value.Y);
+                    if (Img.Name == node.ToString())
+                    {
+                        Layers.Add(Img.Value);
+
+                        for (int i = 0; i < no.Count; i++)
+                        {
+                            AddPos(((WZPointProperty)Img["origin"]).Value.X, ((WZPointProperty)Img["origin"]).Value.Y);
+                        }
+                    }
                 }
             }
-
         }
 
         /// <summary>
@@ -416,6 +422,7 @@ namespace MS.Common.Imaging
     {
         #region Variables
 
+        List<int> No = new List<int>();
         private int id;
         private int forceReturn;
         private int returnMap;
@@ -425,10 +432,10 @@ namespace MS.Common.Imaging
         private bool fly;
         private bool swim;
         private int mobRate;
+        private int ani;
         private string bS, // background set
         tS; // tile set
         private int a, // Alpha?
-         ani,
          cx, // CenterX
          cy, // CenterY
          f, // 
@@ -497,7 +504,7 @@ namespace MS.Common.Imaging
         }
 
         /// <summary>
-        /// 
+        /// Layer number
         /// </summary>
         public int NO
         {
@@ -666,7 +673,35 @@ namespace MS.Common.Imaging
                         {
                             //Console.WriteLine(WzSub.Name);
                             foreach (var objs in WzSub)
-                            {
+                            { 
+                                if (objs.HasChild("x"))
+                                    x = objs["x"].ValueOrDie<int>();
+                                if (objs.HasChild("y"))
+                                    y = objs["y"].ValueOrDie<int>();
+                                if (objs.HasChild("cx"))
+                                    cx = objs["cx"].ValueOrDie<int>();
+                                if (objs.HasChild("cy"))
+                                    cy = objs["cy"].ValueOrDie<int>();
+                                if (objs.HasChild("bS"))
+                                    bS = objs["bS"].ValueOrDie<string>();
+                                if (objs.HasChild("a"))
+                                    a = objs["a"].ValueOrDie<int>();
+                                if (objs.HasChild("ani"))
+                                    ani = objs["ani"].ValueOrDie<int>();
+                                if (objs.HasChild("front"))
+                                    front = objs["front"].ValueOrDie<int>();
+                                if (objs.HasChild("rx"))
+                                    rx = objs["rx"].ValueOrDie<int>();
+                                if (objs.HasChild("ry"))
+                                    ry = objs["ry"].ValueOrDie<int>();
+                                if (objs.HasChild("no"))
+                                {
+                                    no = objs["no"].ValueOrDie<int>();
+                                    No.Add(no);
+                                }
+                                if (objs.HasChild("type"))
+                                    type = objs["type"].ValueOrDie<int>();
+
                                 foreach (var obj in objs)
                                 {
                                     //Console.WriteLine(obj.Name);
@@ -709,7 +744,6 @@ namespace MS.Common.Imaging
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -717,11 +751,6 @@ namespace MS.Common.Imaging
             {
 
             }
-        }
-
-        public void test()
-        {
-            Console.WriteLine(l0);
         }
 
         public CCSprite DrawObj()
@@ -734,7 +763,7 @@ namespace MS.Common.Imaging
 
         public CCSprite DrawBackground()
         {
-            CBackgroundEngine bk = new CBackgroundEngine(null);
+            CBackgroundEngine bk = new CBackgroundEngine(bS, cx, cy, rx, ry, No, Convert.ToBoolean(ani));
 
             return bk.Draw();
         }
@@ -749,6 +778,7 @@ namespace MS.Common.Imaging
             CCSprite spr = new CCSprite();
 
             spr.AddChild(DrawObj());
+            spr.AddChild(DrawBackground());
 
             return spr;
         }
