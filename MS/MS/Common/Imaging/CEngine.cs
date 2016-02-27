@@ -414,6 +414,7 @@ namespace MS.Common.Imaging
     /// </summary>
     public class CMapEngine
     {
+        #region Variables
 
         private int id;
         private int forceReturn;
@@ -424,11 +425,6 @@ namespace MS.Common.Imaging
         private bool fly;
         private bool swim;
         private int mobRate;
-        private string onFirstUserEnter;
-        private string onUserEnter;
-        private int weatherId;
-        private string weatherMessage;
-        private bool weatherAdmin;
         private string bS, // background set
         tS; // tile set
         private int a, // Alpha?
@@ -447,6 +443,10 @@ namespace MS.Common.Imaging
             l1, // Second Sub
             l2, // Third Sub
             oS; // Obj Img Name without the .img
+
+        #endregion
+
+        #region Get/Set
 
         public int A
         {
@@ -646,41 +646,13 @@ namespace MS.Common.Imaging
             set { mobRate = value; }
         }
 
-        public string OnFirstUserEnter
-        {
-            get { return onFirstUserEnter; }
-            set { onFirstUserEnter = value; }
-        }
-
-        public string OnUserEnter
-        {
-            get { return onUserEnter; }
-            set { onUserEnter = value; }
-        }
-
-        public int WeatherID
-        {
-            get { return weatherId; }
-            set { weatherId = value; }
-        }
-
-        public string WeatherMessage
-        {
-            get { return weatherMessage; }
-            set { weatherMessage = value; }
-        }
-
-        public bool WeatherAdmin
-        {
-            get { return weatherAdmin; }
-            set { weatherAdmin = value; }
-        }
-
         public string BS
         {
             get { return bS; }
             set { bS = value; }
         }
+
+        #endregion
 
         public CMapEngine(WZFile mapFile, bool login)
         {
@@ -701,7 +673,7 @@ namespace MS.Common.Imaging
                                     if (obj.HasChild("f"))
                                         f = obj["f"].ValueOrDie<int>();
                                     if (obj.HasChild("l0"))
-                                        l0 = obj["l0"].ValueOrDefault<string>("its empty");
+                                        l0 = obj["l0"].ValueOrDie<string>();
                                     if (obj.HasChild("l1"))
                                         l1 = obj["l1"].ValueOrDie<string>();
                                     if (obj.HasChild("l2"))
@@ -758,6 +730,27 @@ namespace MS.Common.Imaging
             CObjectEngine objEngine = new CObjectEngine(OS, L0, L1, L2);
 
             return objEngine.Draw();
+        }
+
+        public CCSprite DrawBackground()
+        {
+            CBackgroundEngine bk = new CBackgroundEngine(null);
+
+            return bk.Draw();
+        }
+
+        public CCSprite DrawForeground()
+        {
+            return null;
+        }
+
+        public CCSprite DrawAll()
+        {
+            CCSprite spr = new CCSprite();
+
+            spr.AddChild(DrawObj());
+
+            return spr;
         }
 
         private void Write(string msg, params object[] obj)
