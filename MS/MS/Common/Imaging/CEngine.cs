@@ -312,62 +312,129 @@ namespace MS.Common.Imaging
     /// </summary>
     public class CBackgroundEngine : CTextureEngine
     {
+        public enum BackgroundType
+        {
+            Regular = 0,
+            HorizontalTiling = 1,
+            VerticalTiling = 2,
+            HVTiling = 3,
+            HorizontalMoving = 4,
+            VerticalMoving = 5,
+            HorizontalMovingHVTiling = 6,
+            VerticalMovingHVTiling = 7
+
+        };
+
+        private List<int> Cx = new List<int>();
+        private List<int> Cy = new List<int>();
+        private List<int> Rx = new List<int>();
+        private List<int> Ry = new List<int>();
+        private List<int> No = new List<int>();
+        private List<BackgroundType> Type = new List<BackgroundType>();
+
         private List<System.Drawing.Bitmap> Layers = new List<System.Drawing.Bitmap>();
         private WZFile mapFile = new WZFile(GameConstants.FileLocation + GameConstants.MAP, GameConstants.Variant, true);
+        private WZSubProperty bk;
 
         /// <summary>
         /// Locates the background using the WZ file and the name of the map without the .img
         /// </summary>
         /// <param name="file">WZ file with background</param>
         /// <param name="name">Name of the background without .img</param>
-        public CBackgroundEngine(string bS, int cx, int cy, int rx, int ry, List<int> no, bool ani)
+        public CBackgroundEngine(string bS, List<int> cx, List<int> cy, List<int> rx, List<int> ry, List<int> no, List<BackgroundType> type, bool ani, bool front)
         {
-            var bk = mapFile.MainDirectory["Back"][bS + ".img"][ani ? "ani" : "back"];
+            //bk = (WZSubProperty)mapFile.MainDirectory["Back"][bS + ".img"][ani ? "ani" : "back"];
 
-            foreach (WZCanvasProperty Img in bk)
+            Cx = cx;
+            Cy = cy;
+            Rx = rx;
+            Ry = ry;
+            No = no;
+            Type = type;
+
+
+            //Console.WriteLine("bS: {0} \ncx: {1} \ncy: {2} \nrx: {3} \nry: {4} \n no: {5} \ntype: {6} \nani: {7} \nfront: {8}", bS, cx, cy, rx, ry, no, type, ani, front);
+        }
+
+        public void Test()
+        {
+            for (int i = 0; i < 8; i++)
             {
-                foreach (int node in no)
-                {
-                    if (Img.Name == node.ToString())
-                    {
-                        Layers.Add(Img.Value);
-
-                        for (int i = 0; i < no.Count; i++)
-                        {
-                            AddPos(((WZPointProperty)Img["origin"]).Value.X, ((WZPointProperty)Img["origin"]).Value.Y);
-                        }
-                    }
-                }
+                Console.WriteLine(No[i]);
             }
         }
 
-        /// <summary>
-        /// Draws the background
-        /// </summary>
-        /// <returns></returns>
         public CCSprite Draw()
         {
-            CCTexture2D[] texture = new CCTexture2D[Layers.Count];
-            CCSprite[] sprite = new CCSprite[Layers.Count];
-            Console.WriteLine(Layers.Count);
-            for (int i = 0; i < Layers.Count; i++)
+            int X_;
+            int Y_;
+            int cx;
+            int cy;
+
+            for (int i = 0; i < 8; i++)
             {
-                texture[i] = new CCTexture2D();
-                texture[i].InitWithTexture(GetTexture(Layers[i]));
+                foreach (WZCanvasProperty img in bk)
+                {
+                    if (img.Name == i.ToString())
+                    {
+                        AddSize(img.Value.Width, img.Value.Height);
+                        AddOrigin(img);
+                        AddPos(Origin.Value.X, Origin.Value.Y);
+                    }
+                }
+
+                X_ = PosX(i, (int)X[i], Cx[i]);
+                Y_ = PosY(i, (int)Y[i], Cy[i]);
+
+                switch (Type[i])
+                {
+                    case BackgroundType.HorizontalMoving:
+                        return DrawMoving(null, Width[i], X[i] + 0, Y[i], Cx[i]);
+                    case BackgroundType.HorizontalMovingHVTiling:
+                        return DrawHVCopies(null, Width[i], Height[i], X[i] + 0, Y[i], Cx[i]);
+                    case BackgroundType.HorizontalTiling:
+                        return DrawHorizontalCopies(null, Width[i], X[i], Y[i], Cx[i]);
+                    case BackgroundType.HVTiling:
+                        break;
+                    case BackgroundType.Regular:
+                        break;
+                    case BackgroundType.VerticalMoving:
+                        break;
+                    case BackgroundType.VerticalMovingHVTiling:
+                        break;
+                    case BackgroundType.VerticalTiling:
+                        break;
+                    default:
+                        return null;
+                }
             }
 
-            for (int i = 0; i < Layers.Count; i++)
-            {
-                sprite[i] = new CCSprite(texture[i]);
-                sprite[i].SetPosition(X[i], Y[i]);
-            }
+            return null;
+        }
 
-            for (int i = 1; i < Layers.Count; i++)
-            {
-                sprite[0].AddChild(sprite[i], i);
-            }
+        private CCSprite DrawHorizontalCopies(object spr, int v1, float v2, float v3, int v4)
+        {
+            throw new NotImplementedException();
+        }
 
-            return sprite[0];
+        private CCSprite DrawHVCopies(object spr, int v1, int v2, float v3, float v4, int v5)
+        {
+            throw new NotImplementedException();
+        }
+
+        private CCSprite DrawMoving(object spr, int v1, float v2, float v3, int v4)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int PosX(int frame, int x, int cx, int sx = 0)
+        {
+            return (Rx[frame] * (sx - cx + 400) / 100) + x + 400;
+        }
+
+        public int PosY (int frame, int y, int cy, int sy = 0)
+        {
+            return (Ry[frame] * (sy - cy + 300) / 100) + y + 300;
         }
     }
 
@@ -420,9 +487,14 @@ namespace MS.Common.Imaging
     /// </summary>
     public class CMapEngine
     {
-        #region Variables
+        private List<int> Cx = new List<int>();
+        private List<int> Cy = new List<int>();
+        private List<int> Rx = new List<int>();
+        private List<int> Ry = new List<int>();
+        private List<int> No = new List<int>();
+        private List<CBackgroundEngine.BackgroundType> BgType = new List<CBackgroundEngine.BackgroundType>();
 
-        List<int> No = new List<int>();
+        #region Variables
         private int id;
         private int forceReturn;
         private int returnMap;
@@ -450,6 +522,9 @@ namespace MS.Common.Imaging
             l1, // Second Sub
             l2, // Third Sub
             oS; // Obj Img Name without the .img
+
+        CBackgroundEngine back;
+        CObjectEngine ObjEn;
 
         #endregion
 
@@ -533,7 +608,7 @@ namespace MS.Common.Imaging
         /// <summary>
         /// 
         /// </summary>
-        public int Type
+        public int TYPE
         {
             get { return type; }
             set { type = value; }
@@ -673,34 +748,62 @@ namespace MS.Common.Imaging
                         {
                             //Console.WriteLine(WzSub.Name);
                             foreach (var objs in WzSub)
-                            { 
+                            {
                                 if (objs.HasChild("x"))
+                                {
                                     x = objs["x"].ValueOrDie<int>();
+                                    //X_.Add(x);
+                                }
                                 if (objs.HasChild("y"))
+                                {
                                     y = objs["y"].ValueOrDie<int>();
+                                    //Y_.Add(y);
+                                }
                                 if (objs.HasChild("cx"))
+                                {
                                     cx = objs["cx"].ValueOrDie<int>();
+                                    Cx.Add(cx);
+                                }
                                 if (objs.HasChild("cy"))
+                                {
                                     cy = objs["cy"].ValueOrDie<int>();
+                                    Cy.Add(cy);
+                                }
                                 if (objs.HasChild("bS"))
                                     bS = objs["bS"].ValueOrDie<string>();
                                 if (objs.HasChild("a"))
+                                {
                                     a = objs["a"].ValueOrDie<int>();
+                                }
                                 if (objs.HasChild("ani"))
                                     ani = objs["ani"].ValueOrDie<int>();
+
                                 if (objs.HasChild("front"))
                                     front = objs["front"].ValueOrDie<int>();
+
                                 if (objs.HasChild("rx"))
+                                {
                                     rx = objs["rx"].ValueOrDie<int>();
+                                    Rx.Add(rx);
+                                }
+
                                 if (objs.HasChild("ry"))
+                                {
                                     ry = objs["ry"].ValueOrDie<int>();
+                                    Ry.Add(ry);
+                                }
+
                                 if (objs.HasChild("no"))
                                 {
                                     no = objs["no"].ValueOrDie<int>();
                                     No.Add(no);
                                 }
+
                                 if (objs.HasChild("type"))
+                                {
                                     type = objs["type"].ValueOrDie<int>();
+                                    BgType.Add((CBackgroundEngine.BackgroundType)type);
+                                }
 
                                 foreach (var obj in objs)
                                 {
@@ -719,26 +822,6 @@ namespace MS.Common.Imaging
                                         x = obj["x"].ValueOrDie<int>();
                                     if (obj.HasChild("y"))
                                         y = obj["y"].ValueOrDie<int>();
-                                    if (obj.HasChild("cx"))
-                                        cx = obj["cx"].ValueOrDie<int>();
-                                    if (obj.HasChild("cy"))
-                                        cy = obj["cy"].ValueOrDie<int>();
-                                    if (obj.HasChild("bS"))
-                                        bS = obj["bS"].ValueOrDie<string>();
-                                    if (obj.HasChild("a"))
-                                        a = obj["a"].ValueOrDie<int>();
-                                    if (obj.HasChild("ani"))
-                                        ani = obj["ani"].ValueOrDie<int>();
-                                    if (obj.HasChild("front"))
-                                        front = obj["front"].ValueOrDie<int>();
-                                    if (obj.HasChild("rx"))
-                                        rx = obj["rx"].ValueOrDie<int>();
-                                    if (obj.HasChild("ry"))
-                                        ry = obj["ry"].ValueOrDie<int>();
-                                    if (obj.HasChild("no"))
-                                        no = obj["no"].ValueOrDie<int>();
-                                    if (obj.HasChild("type"))
-                                        type = obj["type"].ValueOrDie<int>();
                                     /*if (obj.HasChild("zM"))
                                         Console.WriteLine("Has child");*/
                                 }
@@ -756,16 +839,16 @@ namespace MS.Common.Imaging
         public CCSprite DrawObj()
         {
 
-            CObjectEngine objEngine = new CObjectEngine(OS, L0, L1, L2);
+            ObjEn = new CObjectEngine(OS, L0, L1, L2);
 
-            return objEngine.Draw();
+            return ObjEn.Draw();
         }
 
         public CCSprite DrawBackground()
         {
-            CBackgroundEngine bk = new CBackgroundEngine(bS, cx, cy, rx, ry, No, Convert.ToBoolean(ani));
+            back = new CBackgroundEngine(bS, Cx, Cy, Rx, Ry, No, BgType, Convert.ToBoolean(ani), Convert.ToBoolean(front));
 
-            return bk.Draw();
+            return back.Draw();
         }
 
         public CCSprite DrawForeground()
@@ -781,6 +864,12 @@ namespace MS.Common.Imaging
             spr.AddChild(DrawBackground());
 
             return spr;
+        }
+
+        public void TestMethod()
+        {
+            back = new CBackgroundEngine(bS, Cx, Cy, Rx, Ry, No, BgType, Convert.ToBoolean(ani), Convert.ToBoolean(front));
+            back.Test();
         }
 
         private void Write(string msg, params object[] obj)

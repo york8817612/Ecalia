@@ -20,7 +20,8 @@ namespace MS.Layers.Login
         {
             var map = new WZFile(GameConstants.FileLocation + @GameConstants.UI, GameConstants.Variant, true);
             CMapEngine mapEngine = new CMapEngine(map, true);
-            AddChild(mapEngine.DrawAll());
+            //AddChild(mapEngine.DrawAll());
+            //mapEngine.TestMethod();
         }
 
         public override void Update(float dt)
