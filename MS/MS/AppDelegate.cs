@@ -56,7 +56,7 @@ namespace MS
             // 2D projection
             pDirector.Projection = CCDirectorProjection.Custom;
 
-            var resPolicy = CCResolutionPolicy.ExactFit; // This will stretch out your game
+            var resPolicy = CCResolutionPolicy.ShowAll; // This will stretch out your game
 
             CCDrawManager.SetDesignResolutionSize(preferredWidth,
                                                   preferredHeight,

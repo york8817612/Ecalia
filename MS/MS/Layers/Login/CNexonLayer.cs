@@ -17,108 +17,48 @@ namespace MS.Layers.Login
     /// </summary>
     public class CNexonLayer : CCLayer
     {
-        //private WZPointProperty origin;
-        private CCTexture2D[] texture = new CCTexture2D[1024];
-        private CCSprite[] sprite = new CCSprite[1024];
-        private CCAnimation animation = new CCAnimation();
-        private CCAnimate animate;
-
         private CLogoEngine logoEngine;
-
-       // CTextureEngine texEngine = new CTextureEngine();
-
-        private int FrameCount { get; set; }
+        WZFile UI;
 
         public CNexonLayer()
         {
-            WZFile file = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true);
-            object uilock = new object();
-            lock (uilock)
-                logoEngine = new CLogoEngine(file);
-            
-            AddChild(logoEngine.Draw(true));
+            try
+            {
+                UI = new WZFile(GameConstants.FileLocation + "UI.wz", GameConstants.Variant, true);
 
-            var next = new Thread(new ThreadStart(MoveToWizet));
-            next.Start();
-            next.Join();
+                object uilock = new object();
+                lock (uilock)
+                    logoEngine = new CLogoEngine(UI);
+
+                AddChild(logoEngine.Draw(true));
+
+                var next = new Thread(new ThreadStart(MoveToWizet));
+                next.Start();
+                next.Join();
+            }
+            catch { }
         }
 
         ~CNexonLayer()
         {
-            texture = null;
-            sprite = null;
-            animation = null;
+            
+        }
+
+        public override void Draw()
+        {
+            
+            base.Draw();
         }
 
         public override void OnEnter()
         {
-            /*using (reWZ.WZFile ui = new reWZ.WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true))
-            {
-                var nexon = ui.MainDirectory["Logo.img"]["Nexon"];
-
-                foreach (WZCanvasProperty canvas in nexon)
-                {
-                    texEngine.AddTexture(canvas.Value);
-                    texEngine.AddSize(canvas.Value.Width, canvas.Value.Height);
-                    texEngine.AddOrigin(canvas);
-                    texEngine.AddPos(texEngine.Origin.Value.X, texEngine.Origin.Value.Y);
-                }
-            }
-
-            FrameCount = texEngine.Frame.Count;
-
-            for (int t = 0; t < FrameCount; t++)
-            {
-                texture[t] = new CCTexture2D();
-                texture[t].InitWithTexture(texEngine.Frame[t]);
-
-                if (t == FrameCount)
-                    break;
-            }
-
-            for (int s = 0; s < FrameCount; s++)
-            {
-                sprite[s] = new CCSprite(texture[s]);
-                sprite[s].SetPosition(texEngine.X[s], texEngine.Y[s]);
-                sprite[s].SetTextureRect(new CCRect(0, 0, 800, 600));
-
-                if (s == FrameCount)
-                    break;
-            }
-
-            if (GameConstants.GREATER_VERSION)
-            {
-
-                for (int a = 0; a < FrameCount; a++)
-                {
-                    animation.AddSprite(sprite[a]);
-
-                    if (a == FrameCount)
-                        break;
-                }
-
-                animation.Loops = 1;
-                animation.DelayPerUnit = .2f;
-
-                animate = new CCAnimate(animation);
-                animate.Duration = 7.0f;
-
-                sprite[0].RunAction(animate);
-            }
-
-            AddChild(sprite[0]);
-
-            MoveToWizet();
-            */
             base.OnEnter();
         }
 
         public override void OnExit()
         {
             GC.SuppressFinalize(this);
-            texture = null;
-            sprite = null;
-            animation = null;
+            UI.Dispose();
             base.OnExit();
         }
 

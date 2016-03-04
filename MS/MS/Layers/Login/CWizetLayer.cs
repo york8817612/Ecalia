@@ -14,32 +14,27 @@ namespace MS.Layers.Login
     /// </summary>
     public class CWizetLayer : CCLayer
     {
-        private WZPointProperty origin;
-        private CCTexture2D[] texture = new CCTexture2D[1024];
-        private CCSprite[] sprite = new CCSprite[1024];
-        private CCAnimation animation = new CCAnimation();
-        private CCAnimate animate;
-
-        private int FrameCount { get; set; }
-
-        //CTextureEngine texEngine = new CTextureEngine();
+        WZFile UI;
         CLogoEngine logoEngine;
 
 
         public CWizetLayer()
         {
-            WZFile ui = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @GameConstants.UI, GameConstants.Variant, true);
-            
-            object uilock = new object();
+            try
+            {
+                object uilock = new object();
+                UI = new WZFile(GameConstants.FileLocation + "UI.wz", GameConstants.Variant, true);
 
-            lock(uilock)
-                logoEngine = new CLogoEngine(ui);
+                lock (uilock)
+                    logoEngine = new CLogoEngine(UI);
 
-            AddChild(logoEngine.Draw(false));
-            
-            var login = new Thread(new ThreadStart(MoveToLogin));
-            login.Start();
-            login.Join();
+                AddChild(logoEngine.Draw(false));
+
+                var login = new Thread(new ThreadStart(MoveToLogin));
+                login.Start();
+                login.Join();
+            }
+            catch { }
         }
 
         private void MoveToLogin()
@@ -75,6 +70,7 @@ namespace MS.Layers.Login
         public override void OnExit()
         {
             GC.SuppressFinalize(this);
+            UI.Dispose();
             base.OnExit();
         }
     }

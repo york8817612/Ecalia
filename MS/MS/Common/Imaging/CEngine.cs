@@ -1,7 +1,10 @@
 ﻿using Cocos2D;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using reWZ;
 using reWZ.WZProperties;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -163,7 +166,7 @@ namespace MS.Common.Imaging
                     if (!GameConstants.GREATER_VERSION)
                     {
                         CCTexture2D texture = new CCTexture2D();
-                        texture.InitWithTexture(GetTexture(nxLogo));
+                        texture.InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, nxLogo));
 
                         CCSprite sprite = new CCSprite(texture);
                         sprite.SetPosition(X, Y);
@@ -180,7 +183,7 @@ namespace MS.Common.Imaging
                         for (int i = 0; i < NexonCount; i++)
                         {
                             Textures[i] = new CCTexture2D();
-                            Textures[i].InitWithTexture(GetTexture(nexonImage[i]));
+                            Textures[i].InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, nexonImage[i]));
                         }
 
                         for (int i = 0; i < NexonCount; i++)
@@ -212,7 +215,7 @@ namespace MS.Common.Imaging
                     for (int i = 0; i < WizetCount; i++)
                     {
                         Textures[i] = new CCTexture2D();
-                        Textures[i].InitWithTexture(GetTexture(wizetImage[i]));
+                        Textures[i].InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, wizetImage[i]));
                     }
 
 
@@ -263,7 +266,7 @@ namespace MS.Common.Imaging
     public class CObjectEngine : CTextureEngine
     {
         private List<System.Drawing.Bitmap> ObjImg = new List<System.Drawing.Bitmap>();
-        private WZFile map = new WZFile(GameConstants.FileLocation + GameConstants.MAP, GameConstants.Variant, true);
+        private WZFile map = new WZFile(GameConstants.FileLocation + @"Map.wz", GameConstants.Variant, true);
 
         public CObjectEngine(string oS, string l0, string l1, string l2)
         {
@@ -288,7 +291,7 @@ namespace MS.Common.Imaging
             for (int i = 0; i < ObjImg.Count; i++)
             {
                 texture[i] = new CCTexture2D();
-                texture[i].InitWithTexture(GetTexture(ObjImg[i]));
+                texture[i].InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, ObjImg[i]));
 
                 spr[i] = new CCSprite(texture[i]);
                 spr[i].SetPosition(X[i], Y[i]);
@@ -307,136 +310,6 @@ namespace MS.Common.Imaging
 
     #region Background Engine
 
-    /// <summary>
-    /// Handles the drawing of backgrounds for the login and maps
-    /// </summary>
-    public class CBackgroundEngine : CTextureEngine
-    {
-        public enum BackgroundType
-        {
-            Regular = 0,
-            HorizontalTiling = 1,
-            VerticalTiling = 2,
-            HVTiling = 3,
-            HorizontalMoving = 4,
-            VerticalMoving = 5,
-            HorizontalMovingHVTiling = 6,
-            VerticalMovingHVTiling = 7
-
-        };
-
-        private List<int> Cx = new List<int>();
-        private List<int> Cy = new List<int>();
-        private List<int> Rx = new List<int>();
-        private List<int> Ry = new List<int>();
-        private List<int> No = new List<int>();
-        private List<BackgroundType> Type = new List<BackgroundType>();
-
-        private List<System.Drawing.Bitmap> Layers = new List<System.Drawing.Bitmap>();
-        private WZFile mapFile = new WZFile(GameConstants.FileLocation + GameConstants.MAP, GameConstants.Variant, true);
-        private WZSubProperty bk;
-
-        /// <summary>
-        /// Locates the background using the WZ file and the name of the map without the .img
-        /// </summary>
-        /// <param name="file">WZ file with background</param>
-        /// <param name="name">Name of the background without .img</param>
-        public CBackgroundEngine(string bS, List<int> cx, List<int> cy, List<int> rx, List<int> ry, List<int> no, List<BackgroundType> type, bool ani, bool front)
-        {
-            //bk = (WZSubProperty)mapFile.MainDirectory["Back"][bS + ".img"][ani ? "ani" : "back"];
-
-            Cx = cx;
-            Cy = cy;
-            Rx = rx;
-            Ry = ry;
-            No = no;
-            Type = type;
-
-
-            //Console.WriteLine("bS: {0} \ncx: {1} \ncy: {2} \nrx: {3} \nry: {4} \n no: {5} \ntype: {6} \nani: {7} \nfront: {8}", bS, cx, cy, rx, ry, no, type, ani, front);
-        }
-
-        public void Test()
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                Console.WriteLine(No[i]);
-            }
-        }
-
-        public CCSprite Draw()
-        {
-            int X_;
-            int Y_;
-            int cx;
-            int cy;
-
-            for (int i = 0; i < 8; i++)
-            {
-                foreach (WZCanvasProperty img in bk)
-                {
-                    if (img.Name == i.ToString())
-                    {
-                        AddSize(img.Value.Width, img.Value.Height);
-                        AddOrigin(img);
-                        AddPos(Origin.Value.X, Origin.Value.Y);
-                    }
-                }
-
-                X_ = PosX(i, (int)X[i], Cx[i]);
-                Y_ = PosY(i, (int)Y[i], Cy[i]);
-
-                switch (Type[i])
-                {
-                    case BackgroundType.HorizontalMoving:
-                        return DrawMoving(null, Width[i], X[i] + 0, Y[i], Cx[i]);
-                    case BackgroundType.HorizontalMovingHVTiling:
-                        return DrawHVCopies(null, Width[i], Height[i], X[i] + 0, Y[i], Cx[i]);
-                    case BackgroundType.HorizontalTiling:
-                        return DrawHorizontalCopies(null, Width[i], X[i], Y[i], Cx[i]);
-                    case BackgroundType.HVTiling:
-                        break;
-                    case BackgroundType.Regular:
-                        break;
-                    case BackgroundType.VerticalMoving:
-                        break;
-                    case BackgroundType.VerticalMovingHVTiling:
-                        break;
-                    case BackgroundType.VerticalTiling:
-                        break;
-                    default:
-                        return null;
-                }
-            }
-
-            return null;
-        }
-
-        private CCSprite DrawHorizontalCopies(object spr, int v1, float v2, float v3, int v4)
-        {
-            throw new NotImplementedException();
-        }
-
-        private CCSprite DrawHVCopies(object spr, int v1, int v2, float v3, float v4, int v5)
-        {
-            throw new NotImplementedException();
-        }
-
-        private CCSprite DrawMoving(object spr, int v1, float v2, float v3, int v4)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int PosX(int frame, int x, int cx, int sx = 0)
-        {
-            return (Rx[frame] * (sx - cx + 400) / 100) + x + 400;
-        }
-
-        public int PosY (int frame, int y, int cy, int sy = 0)
-        {
-            return (Ry[frame] * (sy - cy + 300) / 100) + y + 300;
-        }
-    }
 
     #endregion
 
@@ -454,7 +327,7 @@ namespace MS.Common.Imaging
         /// Locates the foreground
         /// </summary>
         /// <param name="map">WZ map file</param>
-        public CForegroundEngine(WZFile map)
+        public CForegroundEngine()
         {
 
         }
@@ -465,11 +338,11 @@ namespace MS.Common.Imaging
         /// <returns></returns>
         public CCSprite DrawFrame()
         {
-            WZFile ui = new WZFile(GameConstants.FileLocation + GameConstants.UI, GameConstants.Variant, true);
-            var frLoc = (WZCanvasProperty)ui.MainDirectory["Login.img"]["Common"]["frame"];
+            WZFile UI = new WZFile(GameConstants.FileLocation + "UI.wz", GameConstants.Variant, true);
+            var frLoc = UI.MainDirectory["Login.img"]["Common"]["frame"] as WZCanvasProperty; 
 
             CCTexture2D texFr = new CCTexture2D();
-            texFr.InitWithTexture(GetTexture(frLoc.Value));
+            texFr.InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, frLoc.Value));
 
             CCSprite spr = new CCSprite(texFr);
             spr.SetPosition(400, 300);
@@ -485,690 +358,139 @@ namespace MS.Common.Imaging
     /// <summary>
     /// Puts the maps completely together using the Foreground Engine and the Background Engine
     /// </summary>
-    public class CMapEngine
+    public class CMapEngine : CTextureEngine
     {
-        private List<int> Cx = new List<int>();
-        private List<int> Cy = new List<int>();
-        private List<int> Rx = new List<int>();
-        private List<int> Ry = new List<int>();
-        private List<int> No = new List<int>();
-        private List<CBackgroundEngine.BackgroundType> BgType = new List<CBackgroundEngine.BackgroundType>();
 
-        #region Variables
-        private int id;
-        private int forceReturn;
-        private int returnMap;
-        private bool town;
-        private bool hasClock;
-        private byte fieldType;
-        private bool fly;
-        private bool swim;
-        private int mobRate;
-        private int ani;
-        private string bS, // background set
-        tS; // tile set
-        private int a, // Alpha?
-         cx, // CenterX
-         cy, // CenterY
-         f, // 
-         front, // 
-         no, // 
-         rx, // 
-         ry, // 
-         type, // 
-         x, // Position X
-            y; // Position Y
-        private string l0, // First Sub
-            l1, // Second Sub
-            l2, // Third Sub
-            oS; // Obj Img Name without the .img
+        public string bS, oS, l0, l1, l2, l3;
+        public int x, y, cx, cy, rx, ry, no;
+        public bool ani;
+        public Vector3 Pos;
+        public GraphicsAdapter adapter;
+        public GraphicsDevice device;
 
-        CBackgroundEngine back;
-        CObjectEngine ObjEn;
+        public Texture2D texture;
 
-        #endregion
+        WZFile MapWz = null, UiWz = null;
+        CCNode batch;
 
-        #region Get/Set
-
-        public int A
+        public CMapEngine()
         {
-            get { return a; }
-            set { a = value; }
+            MapWz = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"\Map.wz", WZVariant.GMS, true);
+            UiWz = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"\UI.wz", WZVariant.GMS, true);
+            batch = new CCNode();
         }
 
-        public int Ani
+        public CCRawList<CCNode> Draw(string Imagename)
         {
-            get { return ani; }
-            set { ani = value; }
-        }
-
-        /// <summary>
-        /// CenterX
-        /// </summary>
-        public int CX
-        {
-            get { return cx; }
-            set { cx = value; }
-        }
-
-        /// <summary>
-        /// CenterY
-        /// </summary>
-        public int CY
-        {
-            get { return cy; }
-            set { cy = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int F
-        {
-            get { return f; }
-            set { f = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int Front
-        {
-            get { return front; }
-            set { front = value; }
-        }
-
-        /// <summary>
-        /// Layer number
-        /// </summary>
-        public int NO
-        {
-            get { return no; }
-            set { no = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int RX
-        {
-            get { return rx; }
-            set { rx = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int RY
-        {
-            get { return ry; }
-            set { ry = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int TYPE
-        {
-            get { return type; }
-            set { type = value; }
-        }
-
-        /// <summary>
-        /// Position X
-        /// </summary>
-        public int X
-        {
-            get { return x; }
-            set { x = value; }
-        }
-
-        /// <summary>
-        /// Position Y
-        /// </summary>
-        public int Y
-        {
-            get { return y; }
-            set { y = value; }
-        }
-
-        /// <summary>
-        /// First Sub
-        /// </summary>
-        public string L0
-        {
-            get { return l0; }
-            set { l0 = value; }
-        }
-
-        /// <summary>
-        /// Second Sub
-        /// </summary>
-        public string L1
-        {
-            get { return l1; }
-            set { l1 = value; }
-        }
-
-        /// <summary>
-        /// Third sub (the WZCanvas)
-        /// </summary>
-        public string L2
-        {
-            get { return l2; }
-            set { l2 = value; }
-        }
-
-        /// <summary>
-        /// Obj Image name without .img
-        /// </summary>
-        public string OS
-        {
-            get { return oS; }
-            set { oS = value; }
-        }
-
-        /// <summary>
-        /// ID of map
-        /// </summary>
-        public int ID
-        {
-            get { return id; }
-            set { id = value; }
-        }
-
-        /// <summary>
-        /// Force Return of map
-        /// </summary>
-        public int ForceReturn
-        {
-            get { return forceReturn; }
-            set { forceReturn = value; }
-        }
-
-        public int ReturnMap
-        {
-            get { return returnMap; }
-            set { returnMap = value; }
-        }
-
-        public bool Town
-        {
-            get { return town; }
-            set { town = value; }
-        }
-
-        public bool HasClock
-        {
-            get { return hasClock; }
-            set { hasClock = value; }
-        }
-
-        public byte FieldType
-        {
-            get { return fieldType; }
-            set { fieldType = value; }
-        }
-
-        public bool Fly
-        {
-            get { return fly; }
-            set { fly = value; }
-        }
-
-        public bool Swim
-        {
-            get { return swim; }
-            set { swim = value; }
-        }
-
-        public int MobRate
-        {
-            get { return mobRate; }
-            set { mobRate = value; }
-        }
-
-        public string BS
-        {
-            get { return bS; }
-            set { bS = value; }
-        }
-
-        #endregion
-
-        public CMapEngine(WZFile mapFile, bool login)
-        {
-            if (login)
+            try
             {
-                foreach (WZImage WzImg in mapFile.MainDirectory)
+                if (Imagename == "MapLogin")
                 {
-                    if (WzImg.Name == "MapLogin.img")
+                    foreach (WZSubProperty Node in UiWz.MainDirectory["MapLogin.img"])
                     {
-                        foreach (WZSubProperty WzSub in WzImg)
+                        if (Node.HasChild("obj"))
                         {
-                            //Console.WriteLine(WzSub.Name);
-                            foreach (var objs in WzSub)
+
+                        }
+
+                        if (Node.Name == "back")
+                        {
+                            foreach (WZSubProperty BackNode in Node)
                             {
-                                if (objs.HasChild("x"))
-                                {
-                                    x = objs["x"].ValueOrDie<int>();
-                                    //X_.Add(x);
-                                }
-                                if (objs.HasChild("y"))
-                                {
-                                    y = objs["y"].ValueOrDie<int>();
-                                    //Y_.Add(y);
-                                }
-                                if (objs.HasChild("cx"))
-                                {
-                                    cx = objs["cx"].ValueOrDie<int>();
-                                    Cx.Add(cx);
-                                }
-                                if (objs.HasChild("cy"))
-                                {
-                                    cy = objs["cy"].ValueOrDie<int>();
-                                    Cy.Add(cy);
-                                }
-                                if (objs.HasChild("bS"))
-                                    bS = objs["bS"].ValueOrDie<string>();
-                                if (objs.HasChild("a"))
-                                {
-                                    a = objs["a"].ValueOrDie<int>();
-                                }
-                                if (objs.HasChild("ani"))
-                                    ani = objs["ani"].ValueOrDie<int>();
+                                if (BackNode.HasChild("x"))
+                                    x = BackNode["x"].ValueOrDie<int>();
+                                if (BackNode.HasChild("y"))
+                                    y = BackNode["y"].ValueOrDie<int>();
+                                if (BackNode.HasChild("cx"))
+                                    cx = BackNode["cx"].ValueOrDie<int>();
+                                if (BackNode.HasChild("cy"))
+                                    cy = BackNode["cy"].ValueOrDie<int>();
+                                if (BackNode.HasChild("rx"))
+                                    rx = BackNode["rx"].ValueOrDie<int>();
+                                if (BackNode.HasChild("ry"))
+                                    ry = BackNode["ry"].ValueOrDie<int>();
+                                if (BackNode.HasChild("bS"))
+                                    bS = BackNode["bS"].ValueOrDie<string>();
+                                if (BackNode.HasChild("no"))
+                                    no = BackNode["no"].ValueOrDie<int>();
 
-                                if (objs.HasChild("front"))
-                                    front = objs["front"].ValueOrDie<int>();
-
-                                if (objs.HasChild("rx"))
-                                {
-                                    rx = objs["rx"].ValueOrDie<int>();
-                                    Rx.Add(rx);
-                                }
-
-                                if (objs.HasChild("ry"))
-                                {
-                                    ry = objs["ry"].ValueOrDie<int>();
-                                    Ry.Add(ry);
-                                }
-
-                                if (objs.HasChild("no"))
-                                {
-                                    no = objs["no"].ValueOrDie<int>();
-                                    No.Add(no);
-                                }
-
-                                if (objs.HasChild("type"))
-                                {
-                                    type = objs["type"].ValueOrDie<int>();
-                                    BgType.Add((CBackgroundEngine.BackgroundType)type);
-                                }
-
-                                foreach (var obj in objs)
-                                {
-                                    //Console.WriteLine(obj.Name);
-                                    if (obj.HasChild("f"))
-                                        f = obj["f"].ValueOrDie<int>();
-                                    if (obj.HasChild("l0"))
-                                        l0 = obj["l0"].ValueOrDie<string>();
-                                    if (obj.HasChild("l1"))
-                                        l1 = obj["l1"].ValueOrDie<string>();
-                                    if (obj.HasChild("l2"))
-                                        l2 = obj["l2"].ValueOrDie<string>();
-                                    if (obj.HasChild("oS"))
-                                        oS = obj["oS"].ValueOrDie<string>();
-                                    if (obj.HasChild("x"))
-                                        x = obj["x"].ValueOrDie<int>();
-                                    if (obj.HasChild("y"))
-                                        y = obj["y"].ValueOrDie<int>();
-                                    /*if (obj.HasChild("zM"))
-                                        Console.WriteLine("Has child");*/
-                                }
+                                batch.AddChild(DrawBackgrounds(bS, no.ToString(), x, y, cx, cy, rx, ry));
+                                
                             }
                         }
                     }
                 }
             }
+            finally
+            {
+                write("Children Count: {0}", batch.ChildrenCount);
+            }
+
+            return batch.Children;
+        }
+
+
+        public CCSprite DrawBackgrounds(string bS, string no, int x, int y, int cx, int cy, int rx, int ry)
+        {
+            CCSprite spr = null;
+            write("bS: {0} no: {1} X: {2} Y: {3} (Absolute Position)", bS, no, x, Math.Abs(y));
+
+            var background = MapWz.MainDirectory["Back"][bS + ".img"]["back"][no] as WZCanvasProperty;
+            texture = GetTexture(CCDrawManager.GraphicsDevice, background.Value);
+
+            //SpriteBatch batch = new SpriteBatch(CCDrawManager.GraphicsDevice);
+
+            //batch.Begin();
+
+            //batch.Draw(texture, new Vector2(x, y), Color.White);
+
+            //batch.End();
+
+            CCTexture2D tex = new CCTexture2D();
+            tex.InitWithTexture(texture);
+
+            spr = new CCSprite(tex);
+
+            if (no == "18")
+            {
+                spr.SetPosition(17, 900);
+            }
             else
             {
-
+                spr.SetPosition(x + 400, (y > 0 ? y : Math.Abs(y)) + 300);
             }
-        }
-
-        public CCSprite DrawObj()
-        {
-
-            ObjEn = new CObjectEngine(OS, L0, L1, L2);
-
-            return ObjEn.Draw();
-        }
-
-        public CCSprite DrawBackground()
-        {
-            back = new CBackgroundEngine(bS, Cx, Cy, Rx, Ry, No, BgType, Convert.ToBoolean(ani), Convert.ToBoolean(front));
-
-            return back.Draw();
-        }
-
-        public CCSprite DrawForeground()
-        {
-            return null;
-        }
-
-        public CCSprite DrawAll()
-        {
-            CCSprite spr = new CCSprite();
-
-            spr.AddChild(DrawObj());
-            spr.AddChild(DrawBackground());
 
             return spr;
         }
 
-        public void TestMethod()
+        public CCSprite DrawFrame()
         {
-            back = new CBackgroundEngine(bS, Cx, Cy, Rx, Ry, No, BgType, Convert.ToBoolean(ani), Convert.ToBoolean(front));
-            back.Test();
+            UiWz = new WZFile(GameConstants.FileLocation + "UI.wz", GameConstants.Variant, true);
+            var frLoc = UiWz.MainDirectory["Login.img"]["Common"]["frame"] as WZCanvasProperty;
+
+            CCTexture2D texFr = new CCTexture2D();
+            texFr.InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, frLoc.Value));
+
+            CCSprite spr = new CCSprite(texFr);
+            spr.SetPosition(400, 300);
+
+            return spr;
         }
 
-        private void Write(string msg, params object[] obj)
+        public void write(string msg, params object[] sender)
         {
-            Console.WriteLine(msg, obj);
-        }
-    }
-
-    #region MapStruct
-
-    /// <summary>
-    /// Contains all the information of the maps
-    /// </summary>
-    public struct CMapStruct
-    {
-
-        private int id;
-        private int forceReturn;
-        private int returnMap;
-        private bool town;
-        private bool hasClock;
-        private byte fieldType;
-        private bool fly;
-        private bool swim;
-        private int mobRate;
-        private string onFirstUserEnter;
-        private string onUserEnter;
-        private int weatherId;
-        private string weatherMessage;
-        private bool weatherAdmin;
-        private string bS, // background set
-        tS; // tile set
-        private int a, // Alpha?
-         ani,
-         cx, // CenterX
-         cy, // CenterY
-         f, // 
-         front, // 
-         no, // 
-         rx, // 
-         ry, // 
-         type, // 
-         x, // Position X
-            y; // Position Y
-        private string l0, // First Sub
-            l1, // Second Sub
-            l2, // Third Sub
-            oS; // Obj Img Name without the .img
-
-        public int A
-        {
-            get { return a; }
-            set { a = value; }
-        }
-
-        public int Ani
-        {
-            get { return ani; }
-            set { ani = value; }
-        }
-
-        /// <summary>
-        /// CenterX
-        /// </summary>
-        public int CX
-        {
-            get { return cx; }
-            set { cx = value; }
-        }
-
-        /// <summary>
-        /// CenterY
-        /// </summary>
-        public int CY
-        {
-            get { return cy; }
-            set { cy = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int F
-        {
-            get { return f; }
-            set { f = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int Front
-        {
-            get { return front; }
-            set { front = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int NO
-        {
-            get { return no; }
-            set { no = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int RX
-        {
-            get { return rx; }
-            set { rx = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int RY
-        {
-            get { return ry; }
-            set { ry = value; }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int Type
-        {
-            get { return type; }
-            set { type = value; }
-        }
-
-        /// <summary>
-        /// Position X
-        /// </summary>
-        public int X
-        {
-            get { return x; }
-            set { x = value; }
-        }
-
-        /// <summary>
-        /// Position Y
-        /// </summary>
-        public int Y
-        {
-            get { return y; }
-            set { y = value; }
-        }
-
-        /// <summary>
-        /// First Sub
-        /// </summary>
-        public string L0
-        {
-            get { return l0; }
-            set { l0 = value; }
-        }
-
-        /// <summary>
-        /// Second Sub
-        /// </summary>
-        public string L1
-        {
-            get { return l1; }
-            set { l1 = value; }
-        }
-
-        /// <summary>
-        /// Third sub (the WZCanvas)
-        /// </summary>
-        public string L2
-        {
-            get { return l2; }
-            set { l2 = value; }
-        }
-
-        /// <summary>
-        /// Obj Image name without .img
-        /// </summary>
-        public string OS
-        {
-            get { return oS; }
-            set { oS = value; }
-        }
-
-        /// <summary>
-        /// ID of map
-        /// </summary>
-        public int ID
-        {
-            get { return id; }
-            set { id = value; }
-        }
-
-        /// <summary>
-        /// Force Return of map
-        /// </summary>
-        public int ForceReturn
-        {
-            get { return forceReturn; }
-            set { forceReturn = value; }
-        }
-
-        public int ReturnMap
-        {
-            get { return returnMap; }
-            set { returnMap = value; }
-        }
-
-        public bool Town
-        {
-            get { return town; }
-            set { town = value; }
-        }
-
-        public bool HasClock
-        {
-            get { return hasClock; }
-            set { hasClock = value; }
-        }
-
-        public byte FieldType
-        {
-            get { return fieldType; }
-            set { fieldType = value; }
-        }
-
-        public bool Fly
-        {
-            get { return fly; }
-            set { fly = value; }
-        }
-
-        public bool Swim
-        {
-            get { return swim; }
-            set { swim = value; }
-        }
-
-        public int MobRate
-        {
-            get { return mobRate; }
-            set { mobRate = value; }
-        }
-
-        public string OnFirstUserEnter
-        {
-            get { return onFirstUserEnter; }
-            set { onFirstUserEnter = value; }
-        }
-
-        public string OnUserEnter
-        {
-            get { return onUserEnter; }
-            set { onUserEnter = value; }
-        }
-
-        public int WeatherID
-        {
-            get { return weatherId; }
-            set { weatherId = value; }
-        }
-
-        public string WeatherMessage
-        {
-            get { return weatherMessage; }
-            set { weatherMessage = value; }
-        }
-
-        public bool WeatherAdmin
-        {
-            get { return weatherAdmin; }
-            set { weatherAdmin = value; }
-        }
-
-        public string BS
-        {
-            get { return bS; }
-            set { bS = value; }
-        }
-
-        public CMapStruct(int mapid) : this()
-        {
-            id = mapid;
+            Console.WriteLine(msg, sender);
         }
     }
 
-    #endregion
+        #endregion
 
-    #endregion
+        #region Texture Engine
 
-    #region Texture Engine
-
-    /// <summary>
-    /// Handles the creation of textures
-    /// </summary>
-    public abstract class CTextureEngine
+        /// <summary>
+        /// Handles the creation of textures
+        /// </summary>
+        public class CTextureEngine
     {
         private List<Microsoft.Xna.Framework.Graphics.Texture2D> frames = new List<Microsoft.Xna.Framework.Graphics.Texture2D>();
         private List<int> Width_ = new List<int>();
@@ -1202,7 +524,7 @@ namespace MS.Common.Imaging
 
         public void AddTexture(System.Drawing.Bitmap img)
         {
-            frames.Add(GetTexture(img));
+            frames.Add(GetTexture(CCDrawManager.GraphicsDevice, img));
         }
 
         public List<float> X
@@ -1249,7 +571,6 @@ namespace MS.Common.Imaging
                 stream.Close();
 
                 byteArray = stream.ToArray();
-                //                stream.Dispose();
             }
 
             return byteArray;
@@ -1260,13 +581,13 @@ namespace MS.Common.Imaging
         /// </summary>
         /// <param name="img"></param>
         /// <returns></returns>
-        public Microsoft.Xna.Framework.Graphics.Texture2D GetTexture(System.Drawing.Bitmap img)
+        public Texture2D GetTexture(GraphicsDevice g, System.Drawing.Bitmap img)
         {
             int data = img.Height * img.Width * 4;
             MemoryStream stream = new MemoryStream(data);
             img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
 
-            var tex = Microsoft.Xna.Framework.Graphics.Texture2D.FromStream(CCDrawManager.GraphicsDevice, stream);
+            var tex = Texture2D.FromStream(g, stream);
 
             return tex;
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using reWZ;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,28 +38,30 @@ namespace MS.Common
 
         #region WZ File Settings
 
-        public static reWZ.WZVariant Variant = (GREATER_VERSION ? reWZ.WZVariant.BMS : reWZ.WZVariant.GMS);
+        public static WZVariant Variant = (GREATER_VERSION ? WZVariant.BMS : WZVariant.GMS);
         public static string FileLocation = AppDomain.CurrentDomain.BaseDirectory;
-        /// <summary>
+        
+        
+        /*/// <summary>
         /// List of WZ files (Temp)
         /// </summary>
-        public static string BASE = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            CHARACTER = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            EFFECT = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            ETC = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            ITEM = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            LIST = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            MAP = (GREATER_VERSION ? "Map.wz" : "Map.wz"),
-            MOB = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            MORPH = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            NPC = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            QUEST = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            REACTOR = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            SKILL = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            SOUND = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            STRING = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            TAMING_MOB = (GREATER_VERSION ? "2.wz" : "1.wz"),
-            UI = (GREATER_VERSION ? "UI2.wz" : "UI1.wz");
+        public static WZFile BaseWz = new WZFile(FileLocation + @"\Base.wz", Variant, true),
+            CharacterWz = new WZFile(FileLocation + @"\Character.wz", Variant, true),
+            EffectWz = new WZFile(FileLocation + @"\Effect.wz", Variant, true),
+            EtcWz = new WZFile(FileLocation + @"\Etc.wz", Variant, true),
+            ItemWz = new WZFile(FileLocation + @"\Item.wz", Variant, true),
+            ListWz = new WZFile(FileLocation + @"\List.wz", Variant, true),
+            MapWz = new WZFile(FileLocation + @"\Map.wz", Variant, true),
+            MobWz = new WZFile(FileLocation + @"\Mob.wz", Variant, true),
+            MorphWz = new WZFile(FileLocation + @"\Morph.wz", Variant, true),
+            NpcWz = new WZFile(FileLocation + @"\Npc.wz", Variant, true),
+            QuestWz = new WZFile(FileLocation + @"\Quest.wz", Variant, true),
+            ReactorWz = new WZFile(FileLocation + @"\Reactor.wz", Variant, true),
+            SkillWz = new WZFile(FileLocation + @"\Skill.wz", Variant, true),
+            SoundWz = new WZFile(FileLocation + @"\Sound.wz", Variant, true),
+            StringWz = new WZFile(FileLocation + @"\String.wz", Variant, true),
+            TamingMobWz = new WZFile(FileLocation + @"\TamingMob.wz", Variant, true),
+            UiWz = new WZFile(FileLocation + @"UI.wz", Variant, true);*/
 
         #endregion
     }

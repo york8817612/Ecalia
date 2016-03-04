@@ -5,6 +5,7 @@ using Cocos2D;
 using MS.Common.Net;
 using MS.Common;
 using MS.Common.Imaging;
+//using System.Windows.Forms;
 
 namespace MS
 {
@@ -13,8 +14,9 @@ namespace MS
     /// </summary>
     public class MainGame : Game
     {
+        public KeyboardState state;
         private readonly GraphicsDeviceManager graphics;
-        private CNetwork network = new CNetwork(GameConstants.IP, GameConstants.LOGIN_PORT);
+        //private CNetwork network = new CNetwork(GameConstants.IP, GameConstants.LOGIN_PORT);
 
         public MainGame()
         {
@@ -31,7 +33,8 @@ namespace MS
             CCApplication application = new AppDelegate(this, graphics);
             Components.Add(application);
             //network.Initialize();
-            
+
+            state = Keyboard.GetState();
         }
 
         private void ProcessBackClick()
@@ -54,16 +57,23 @@ namespace MS
                 ProcessBackClick();
             }
 
-            if (CCDirector.SharedDirector.RunningScene != null)
-            {
+            UpdateInput();
 
-            }
             base.Update(gameTime);
+        }
+
+        private void UpdateInput()
+        {
+            KeyboardState newState = Keyboard.GetState();
+            CParallaxCamera cam = new CParallaxCamera(graphics.GraphicsDevice.Viewport);
+            cam.Pos = new Vector2(0, 0);
+            cam.Rotation = 1;
+            cam.Update();
         }
 
         protected override void OnExiting(object sender, EventArgs args)
         {
-            network.Disconnect();
+            //network.Disconnect();
             base.OnExiting(sender, args);
         }
     }

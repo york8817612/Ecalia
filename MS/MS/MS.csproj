@@ -36,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Game.ico</ApplicationIcon>
@@ -46,13 +47,10 @@
   <ItemGroup>
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Common\GameConstants.cs" />
+    <Compile Include="Common\Imaging\CBackground.cs" />
     <Compile Include="Common\Imaging\CParallaxCamera.cs" />
     <Compile Include="Common\Imaging\DisplayOrder.cs" />
     <Compile Include="Common\Imaging\CEngine.cs" />
-    <Compile Include="Common\Imaging\Map\CFoothold.cs" />
-    <Compile Include="Common\Imaging\Map\CLife.cs" />
-    <Compile Include="Common\Imaging\Map\CPortal.cs" />
-    <Compile Include="Common\Imaging\Map\CSeat.cs" />
     <Compile Include="Common\Net\ArrayReader.cs" />
     <Compile Include="Common\Net\ArrayWriter.cs" />
     <Compile Include="Common\Net\CNetwork.cs" />
@@ -75,8 +73,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="cocos2d-xna, Version=2.2.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Cocos2D-XNA.WindowsDX.1.3.0.2\lib\net40\cocos2d-xna.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Cocos2D-XNA.WindowsDX.1.3.0.2\lib\net40\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -148,6 +146,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Common\Imaging\Map\" />
     <Folder Include="Layers\Character\" />
     <Folder Include="Layers\Map\" />
   </ItemGroup>
