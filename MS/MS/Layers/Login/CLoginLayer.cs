@@ -8,29 +8,28 @@ using reWZ;
 using reWZ.WZProperties;
 using MS.Common.Imaging;
 using MS.Common;
+using Microsoft.Xna.Framework.Input;
 
 namespace MS.Layers.Login
 {
     public class CLoginLayer : CCLayer
     {
-        private int FrameCount { get; set; }
         CMapEngine Map;
+        MouseState state;
 
         public CLoginLayer()
         {
             Map = new CMapEngine();
+            state = Mouse.GetState();
+
+            //Camera.SetEyeXyz(0, 0, 22);
             //Camera.SetUpXyz(0, 500, 0);
-            //Camera.SetEyeXyz(0, 0, 800);
+            //Camera.SetCenterXyz(0, 0, 0);
         }
 
         public override void Draw()
         {
             base.Draw();
-        }
-
-        public override void Update(float dt)
-        {
-            base.Update(dt);
         }
 
         public static CCScene Scene
@@ -54,6 +53,11 @@ namespace MS.Layers.Login
                 AddChild(node);
             }
             AddChild(Map.DrawFrame());
+
+            CCMoveTo moveto = new CCMoveTo(20.0f, new CCPoint(0, -2500));
+
+            //RunAction(moveto); // only use this for testing reasons
+
             base.OnEnter();
         }
 

@@ -453,7 +453,7 @@ namespace MS.Common.Imaging
 
             if (no == "18")
             {
-                spr.SetPosition(17, 900);
+                spr.SetPosition(273, 2320); // this took a bit to find....
             }
             else
             {

@@ -14,7 +14,8 @@ namespace MS
     /// </summary>
     public class MainGame : Game
     {
-        public KeyboardState state;
+        public KeyboardState kstate;
+        MouseState state;
         private readonly GraphicsDeviceManager graphics;
         //private CNetwork network = new CNetwork(GameConstants.IP, GameConstants.LOGIN_PORT);
 
@@ -34,7 +35,6 @@ namespace MS
             Components.Add(application);
             //network.Initialize();
 
-            state = Keyboard.GetState();
         }
 
         private void ProcessBackClick()
@@ -57,18 +57,12 @@ namespace MS
                 ProcessBackClick();
             }
 
-            UpdateInput();
-
             base.Update(gameTime);
         }
 
         private void UpdateInput()
         {
-            KeyboardState newState = Keyboard.GetState();
-            CParallaxCamera cam = new CParallaxCamera(graphics.GraphicsDevice.Viewport);
-            cam.Pos = new Vector2(0, 0);
-            cam.Rotation = 1;
-            cam.Update();
+            
         }
 
         protected override void OnExiting(object sender, EventArgs args)
