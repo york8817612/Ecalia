@@ -145,7 +145,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Common\Imaging\Map\" />
     <Folder Include="Layers\Map\" />
   </ItemGroup>
   <ItemGroup>

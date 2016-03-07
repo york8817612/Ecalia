@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MS.Common.Imaging
+namespace Ecalia.Common.Imaging
 {
 
     #region Logo Engine
