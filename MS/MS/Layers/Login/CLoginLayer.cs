@@ -21,15 +21,6 @@ namespace MS.Layers.Login
         {
             Map = new CMapEngine();
             state = Mouse.GetState();
-
-            //Camera.SetEyeXyz(0, 0, 22);
-            //Camera.SetUpXyz(0, 500, 0);
-            //Camera.SetCenterXyz(0, 0, 0);
-        }
-
-        public override void Draw()
-        {
-            base.Draw();
         }
 
         public static CCScene Scene
@@ -48,17 +39,33 @@ namespace MS.Layers.Login
 
         public override void OnEnter()
         {
-            foreach (CCNode node in Map.Draw("MapLogin"))
-            {
-                AddChild(node);
-            }
-            AddChild(Map.DrawFrame());
+            AddChild(Map.Draw("MapLogin"));
+            //AddChild(Map.DrawFrame());
 
-            CCMoveTo moveto = new CCMoveTo(20.0f, new CCPoint(0, -2500));
+            //CreateButtons();
 
-            //RunAction(moveto); // only use this for testing reasons
+            //CheckLocation();
 
             base.OnEnter();
+        }
+
+        void CreateButtons()
+        {
+        }
+
+        void TextFields()
+        {
+            CCTextFieldTTF User = new CCTextFieldTTF("Type here", "Arial", 12f);
+            User.Position = new CCPoint(400, 300);
+            AddChild(User, 10);
+        }
+
+        void CheckLocation()
+        {
+            Camera.SetEyeXyz(0, 0, 700);
+            CCMoveTo moveto = new CCMoveTo(20.0f, new CCPoint(0, -2000));
+
+            RunAction(moveto);
         }
 
         public override void OnExit()

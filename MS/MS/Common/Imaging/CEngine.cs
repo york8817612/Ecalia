@@ -261,98 +261,6 @@ namespace MS.Common.Imaging
 
     #endregion
 
-    #region Object Engine
-
-    public class CObjectEngine : CTextureEngine
-    {
-        private List<System.Drawing.Bitmap> ObjImg = new List<System.Drawing.Bitmap>();
-        private WZFile map = new WZFile(GameConstants.FileLocation + @"Map.wz", GameConstants.Variant, true);
-
-        public CObjectEngine(string oS, string l0, string l1, string l2)
-        {
-            Console.WriteLine(oS + " " + l0 + " " + l1 + " " + l2);
-            if (oS != null && l0 != null && l1 != null && l2 != null)
-            {
-                var objs = (WZSubProperty)map.MainDirectory["Obj"][oS + ".img"][l0][l1][l2];
-
-                foreach (WZCanvasProperty CanvasObjs in objs)
-                {
-                    ObjImg.Add(CanvasObjs.Value);
-                    AddPos(((WZPointProperty)CanvasObjs["origin"]).Value.X, ((WZPointProperty)CanvasObjs["origin"]).Value.Y);
-                }
-            }
-        }
-
-        public CCSprite Draw()
-        {
-            CCTexture2D[] texture = new CCTexture2D[ObjImg.Count];
-            CCSprite[] spr = new CCSprite[ObjImg.Count];
-
-            for (int i = 0; i < ObjImg.Count; i++)
-            {
-                texture[i] = new CCTexture2D();
-                texture[i].InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, ObjImg[i]));
-
-                spr[i] = new CCSprite(texture[i]);
-                spr[i].SetPosition(X[i], Y[i]);
-            }
-
-            for (int i = 1; i < ObjImg.Count; i++)
-            {
-                spr[0].AddChild(spr[i]);
-            }
-
-            return spr[0];
-        }
-    }
-
-    #endregion
-
-    #region Background Engine
-
-
-    #endregion
-
-    #region Foreground Engine
-
-    /// <summary>
-    /// Handles drawing the foreground for the login and maps
-    /// </summary>
-    public class CForegroundEngine : CTextureEngine
-    {
-        private List<System.Drawing.Bitmap> Layers = new List<System.Drawing.Bitmap>(8);
-        //private CTextureEngine tex = new CTextureEngine();
-
-        /// <summary>
-        /// Locates the foreground
-        /// </summary>
-        /// <param name="map">WZ map file</param>
-        public CForegroundEngine()
-        {
-
-        }
-
-        /// <summary>
-        /// Draws the login frame
-        /// </summary>
-        /// <returns></returns>
-        public CCSprite DrawFrame()
-        {
-            WZFile UI = new WZFile(GameConstants.FileLocation + "UI.wz", GameConstants.Variant, true);
-            var frLoc = UI.MainDirectory["Login.img"]["Common"]["frame"] as WZCanvasProperty; 
-
-            CCTexture2D texFr = new CCTexture2D();
-            texFr.InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, frLoc.Value));
-
-            CCSprite spr = new CCSprite(texFr);
-            spr.SetPosition(400, 300);
-
-            return spr;
-        }
-    }
-
-    #endregion
-
     #region Map Engine
 
     /// <summary>
@@ -362,7 +270,7 @@ namespace MS.Common.Imaging
     {
 
         public string bS, oS, l0, l1, l2, l3;
-        public int x, y, cx, cy, rx, ry, no;
+        public int x, y, z, cx, cy, rx, ry, no;
         public bool ani;
         public Vector3 Pos;
         public GraphicsAdapter adapter;
@@ -370,17 +278,18 @@ namespace MS.Common.Imaging
 
         public Texture2D texture;
 
-        WZFile MapWz = null, UiWz = null;
-        CCNode batch;
+        public WZFile MapWz = null, UiWz = null;
+        private CCNode batch;
+        private CCParallaxNode layers;
 
         public CMapEngine()
         {
-            MapWz = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"\Map.wz", WZVariant.GMS, true);
-            UiWz = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"\UI.wz", WZVariant.GMS, true);
+            MapWz = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"\Map.wz", GameConstants.Variant, true);
+            UiWz = new WZFile(AppDomain.CurrentDomain.BaseDirectory + @"\UI.wz", GameConstants.Variant, true);
             batch = new CCNode();
         }
 
-        public CCRawList<CCNode> Draw(string Imagename)
+        public CCNode Draw(string Imagename)
         {
             try
             {
@@ -390,7 +299,34 @@ namespace MS.Common.Imaging
                     {
                         if (Node.HasChild("obj"))
                         {
+                            foreach (var obj in Node)
+                            {
+                                if (obj.Name == "obj")
+                                {
+                                    foreach (var objs in obj)
+                                    {
+                                        //Console.WriteLine(obj.Name);
+                                        //if (obj.HasChild("f"))
+                                        //f = obj["f"].ValueOrDie<int>();
+                                        if (objs.HasChild("l0"))
+                                            l0 = objs["l0"].ValueOrDie<string>();
+                                        if (objs.HasChild("l1"))
+                                            l1 = objs["l1"].ValueOrDie<string>();
+                                        if (objs.HasChild("l2"))
+                                            l2 = objs["l2"].ValueOrDie<string>();
+                                        if (objs.HasChild("oS"))
+                                            oS = objs["oS"].ValueOrDie<string>();
+                                        if (objs.HasChild("x"))
+                                            x = objs["x"].ValueOrDie<int>();
+                                        if (objs.HasChild("y"))
+                                            y = objs["y"].ValueOrDie<int>();
+                                        if (objs.HasChild("z"))
+                                            z = objs["z"].ValueOrDie<int>(); 
 
+                                        batch.AddChild(DrawMapObjects(oS, l0, l1, l2, x, y, z));
+                                    }
+                                }
+                            }
                         }
 
                         if (Node.Name == "back")
@@ -414,8 +350,45 @@ namespace MS.Common.Imaging
                                 if (BackNode.HasChild("no"))
                                     no = BackNode["no"].ValueOrDie<int>();
 
-                                batch.AddChild(DrawBackgrounds(bS, no.ToString(), x, y, cx, cy, rx, ry));
+                                batch.AddChild(DrawBackgrounds(bS, no.ToString(), x, y, z, cx, cy, rx, ry));
                                 
+                            }
+                        }
+                    }
+
+                    batch.AddChild(DrawFrame());
+                }
+                else
+                {
+                    foreach (WZSubProperty Mapimg in MapWz.MainDirectory["Map"]["Map" + Imagename[0]][Imagename + ".img"])
+                    {
+                        Console.WriteLine(Mapimg.Name);
+
+                        if (Mapimg.Name == "back")
+                        {
+                            foreach (WZSubProperty BackNode in Mapimg)
+                            {
+                                if (BackNode.HasChild("x"))
+                                    x = BackNode["x"].ValueOrDie<int>();
+                                if (BackNode.HasChild("y"))
+                                    y = BackNode["y"].ValueOrDie<int>();
+                                if (BackNode.HasChild("cx"))
+                                    cx = BackNode["cx"].ValueOrDie<int>();
+                                if (BackNode.HasChild("cy"))
+                                    cy = BackNode["cy"].ValueOrDie<int>();
+                                if (BackNode.HasChild("rx"))
+                                    rx = BackNode["rx"].ValueOrDie<int>();
+                                if (BackNode.HasChild("ry"))
+                                    ry = BackNode["ry"].ValueOrDie<int>();
+                                if (BackNode.HasChild("bS"))
+                                    bS = BackNode["bS"].ValueOrDie<string>();
+                                if (BackNode.HasChild("no"))
+                                    no = BackNode["no"].ValueOrDie<int>();
+                                if (BackNode.HasChild("z"))
+                                    z = BackNode["z"].ValueOrDie<int>();
+
+                                batch.AddChild(DrawBackgrounds(bS, no.ToString(), x, y, z, cx, cy, rx, ry));
+
                             }
                         }
                     }
@@ -423,42 +396,79 @@ namespace MS.Common.Imaging
             }
             finally
             {
-                write("Children Count: {0}", batch.ChildrenCount);
             }
 
-            return batch.Children;
+            return batch;
         }
 
+        private CCSprite DrawMapObjects(string oS, string l0, string l1, string l2, int x, int y, int z)
+        {
+            Console.WriteLine("oS: {0} l0: {1} l1: {2} l2: {3} X: {4} Y: {5} Z: {6}", oS, l0, l1, l2, x, y, z);
+            var MapObj = MapWz.MainDirectory["Obj"][oS + ".img"][l0][l1][l2] as WZSubProperty;
+            CCTexture2D[] tex = new CCTexture2D[5];
+            CCSprite[] spr = new CCSprite[5];
 
-        public CCSprite DrawBackgrounds(string bS, string no, int x, int y, int cx, int cy, int rx, int ry)
+            CCAnimation animation = new CCAnimation();
+            CCAnimate animate = null;
+
+            foreach (var Objs in MapObj)
+            {
+                if (Objs is WZCanvasProperty)
+                {
+                    tex[0] = new CCTexture2D();
+                    tex[0].InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, ((WZCanvasProperty)Objs).Value));
+                    spr[0] = new CCSprite(tex[0]);
+
+                    if (oS == "login" && l0 == "Title" && l1 == "effect")
+                    {
+                        spr[0].SetPosition(x + 400, Math.Abs(y) + 300);
+                    }
+                    else
+                    {
+                        spr[0].SetPosition(x + 400, Math.Abs(y) + 300);
+                    }
+                    if (l1 == "pirate")
+                    {
+                        spr[0].ZOrder = 0;
+                    }
+                    else
+                    {
+                        spr[0].ZOrder = z;
+                    }
+                }
+            }
+
+            return spr[0];
+        }
+
+        private CCSprite DrawBackgrounds(string bS, string no, int x, int y, int z, int cx, int cy, int rx, int ry)
         {
             CCSprite spr = null;
-            write("bS: {0} no: {1} X: {2} Y: {3} (Absolute Position)", bS, no, x, Math.Abs(y));
+            //write("bS: {0} no: {1} X: {2} Y: {3} (Absolute Position)", bS, no, x, Math.Abs(y));
 
             var background = MapWz.MainDirectory["Back"][bS + ".img"]["back"][no] as WZCanvasProperty;
             texture = GetTexture(CCDrawManager.GraphicsDevice, background.Value);
-
-            //SpriteBatch batch = new SpriteBatch(CCDrawManager.GraphicsDevice);
-
-            //batch.Begin();
-
-            //batch.Draw(texture, new Vector2(x, y), Color.White);
-
-            //batch.End();
 
             CCTexture2D tex = new CCTexture2D();
             tex.InitWithTexture(texture);
 
             spr = new CCSprite(tex);
 
-            if (no == "18")
+            if (bS == "login" && no == "18")
             {
                 spr.SetPosition(273, 2320); // this took a bit to find....
             }
+            else if (bS == "login" && no == "0" || no == "1" || no == "2")
+            {
+                spr.SetTextureRect(new CCRect(0, 0, 800, 600));
+            }
             else
             {
-                spr.SetPosition(x + 400, (y > 0 ? y : Math.Abs(y)) + 300);
+                //spr.SetPosition(x + 400, (y > 0 ? y : Math.Abs(y)) + 300);
+                spr.SetPosition(x + 400, Math.Abs(y) + 300);
             }
+
+            spr.ZOrder = z;
 
             return spr;
         }
@@ -468,11 +478,25 @@ namespace MS.Common.Imaging
             UiWz = new WZFile(GameConstants.FileLocation + "UI.wz", GameConstants.Variant, true);
             var frLoc = UiWz.MainDirectory["Login.img"]["Common"]["frame"] as WZCanvasProperty;
 
+            //var frLoc = MapWz.MainDirectory["Obj"]["login.img"]["Common"]["frame"]["0"]["0"] as WZCanvasProperty;
+
             CCTexture2D texFr = new CCTexture2D();
             texFr.InitWithTexture(GetTexture(CCDrawManager.GraphicsDevice, frLoc.Value));
 
+            if (frLoc.HasChild("x"))
+                x = frLoc["x"].ValueOrDefault(0);
+            if (frLoc.HasChild("y"))
+                y = frLoc["y"].ValueOrDefault(0);
+            if (frLoc.HasChild("z"))
+                z = ((WZInt32Property)frLoc["z"]).Value;
+
+            if (x == 0)
+                x = frLoc.Value.Width / 2;
+            if (y == 0)
+                y = frLoc.Value.Height / 2;
+
             CCSprite spr = new CCSprite(texFr);
-            spr.SetPosition(400, 300);
+            spr.SetPosition(Math.Abs(x) + 245, Math.Abs(y));
 
             return spr;
         }

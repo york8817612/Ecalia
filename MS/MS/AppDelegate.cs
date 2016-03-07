@@ -68,9 +68,12 @@ namespace MS
             // set FPS. the default value is 1.0/60 if you don't call this
             pDirector.AnimationInterval = 1.0 / 60;
 
-            CCScene pScene = CNexonLayer.Scene;
+            CCScene pScene = CLoginLayer.Scene;
 
             pDirector.RunWithScene(pScene);
+
+            CCDrawManager.SetViewPort(0, 0, 800, 600);
+
             return true;
         }
 
