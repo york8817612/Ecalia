@@ -1,7 +1,8 @@
-MS/MS/bin/WindowsDX/Debug/BitMiracle.LibTiff.NET.dll
-MS/MS/bin
-MS/MS/obj
-MS/.vs/MS/v14/.suo
+MS\MS\bin
+MS\MS\obj
+MS\.vs\MS\v14\.suo
 MS\MSServer\bin
 MS\MSServer\obj
-MS\Ecalia
+MS\Ecalia\bin
+MS\Ecalia\obj
+MS\MS
