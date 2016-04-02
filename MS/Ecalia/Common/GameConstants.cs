@@ -11,15 +11,16 @@ namespace Ecalia.Common
     {
         #region Version Settings
 
-        public static ushort MAJOR_VERSION = 62;
+        public static ushort MAJOR_VERSION = 117;
         public static string MINOR_VERSION = "1";
         public static bool GREATER_VERSION = (MAJOR_VERSION > 79 ? true : false); // change the number to whatever the version maple changed the nexon logo animation, I think its 79 but idk.. 
-        
+
 
         #endregion
 
         #region Client Settings
 
+        public static string WINDOW_TITLE = "Ecalia";
         public static int WINDOW_WIDTH = 800;
         public static int WINDOW_HEIGHT = 600;
         public static bool WINDOWED = true;
@@ -39,7 +40,7 @@ namespace Ecalia.Common
         #region WZ File Settings
 
         public static WZVariant Variant = (GREATER_VERSION ? WZVariant.BMS : WZVariant.GMS);
-        public static string FileLocation = AppDomain.CurrentDomain.BaseDirectory;
+        public static string FileLocation = (GREATER_VERSION ? @"D:\v117\MapleStory" : @"D:\ClassicMS");//AppDomain.CurrentDomain.BaseDirectory;
         
         
         /*/// <summary>
