@@ -68,7 +68,7 @@ namespace Ecalia.Screens
             // 
             this.ClientSize = new System.Drawing.Size(800, 600);
             this.Name = "CApplication";
-            this.Text = "Ecalia";
+            this.Text = "Ecalia Client";
             this.ResumeLayout(false);
 
         }
