@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Ecalia.Screens
 {
@@ -42,16 +43,18 @@ namespace Ecalia.Screens
 
         public void Run()
         {
-            Initialize();
             RenderLoop.Run(this, RenderCallback);
         }
 
         private void RenderCallback()
         {
             device.Clear(ClearFlags.Target, new RawColorBGRA(0, 0, 0, 0), 1.0f, 0);
-
             device.Present();
+        }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
         }
 
         public new void Dispose()
@@ -78,9 +81,29 @@ namespace Ecalia.Screens
             get { return device; }
         }
 
-        private void Initialize()
+        public void Render()
         {
-            graphics.Render(000010000);
+            graphics.RenderMap(10000);
+        }
+
+        Action RenderOnce(Action action)
+        {
+            var context = new RenderOnlyOnce();
+            Action ret = () =>
+            {
+                if (false == context.AlreadyCalled)
+                {
+                    action();
+                    context.AlreadyCalled = true;
+                }
+            };
+
+            return ret;
+        }
+
+         class RenderOnlyOnce
+        {
+            public bool AlreadyCalled;
         }
 
 
