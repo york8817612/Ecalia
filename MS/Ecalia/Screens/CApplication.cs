@@ -20,6 +20,7 @@ namespace Ecalia.Screens
     {
         private Direct3D D3D;
         public static Device device;
+        private SwapChain swapChain;
 
         private CGraphicsEngine graphics;
 
@@ -34,11 +35,12 @@ namespace Ecalia.Screens
         {
             D3D = new Direct3D();
             device = new Device(D3D, 0, DeviceType.Hardware, Handle, CreateFlags.HardwareVertexProcessing, new PresentParameters(Width, Height));
+            swapChain = new SwapChain(device, new PresentParameters(Width, Height) { });
         }
 
         private void InitializeEngine()
         {
-            graphics = new CGraphicsEngine();
+            graphics = new CGraphicsEngine() { ID = 10000 };
         }
 
         public void Run()
@@ -48,7 +50,14 @@ namespace Ecalia.Screens
 
         private void RenderCallback()
         {
-            device.Clear(ClearFlags.Target, new RawColorBGRA(0, 0, 0, 0), 1.0f, 0);
+            device.Clear(ClearFlags.Target, new RawColorBGRA(0, 0, 0, 1), 1.0f, 0);
+
+            device.BeginScene();
+
+            Render();
+
+            device.EndScene();
+
             device.Present();
         }
 
@@ -83,29 +92,8 @@ namespace Ecalia.Screens
 
         public void Render()
         {
-            graphics.RenderMap(10000);
+            graphics.OnEnter();
         }
-
-        Action RenderOnce(Action action)
-        {
-            var context = new RenderOnlyOnce();
-            Action ret = () =>
-            {
-                if (false == context.AlreadyCalled)
-                {
-                    action();
-                    context.AlreadyCalled = true;
-                }
-            };
-
-            return ret;
-        }
-
-         class RenderOnlyOnce
-        {
-            public bool AlreadyCalled;
-        }
-
 
         /*private SharpDX.DXGI.ModeDescription modeDesc;
         private SharpDX.DXGI.SwapChain swapChain;

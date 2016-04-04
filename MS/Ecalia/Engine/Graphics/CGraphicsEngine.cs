@@ -20,10 +20,31 @@ namespace Ecalia.Engine.Graphics
         private int a, ani, cx, cy, f, front, no, rx, ry, type, x, y;
         private string bS, tS, oS;
 
+        public int ID { get; set; }
+
         public CGraphicsEngine()
         {
             Map = new WZFile(GameConstants.FileLocation + @"\Map.wz", GameConstants.Variant, true);
             UI = new WZFile(GameConstants.FileLocation + @"\UI.wz", GameConstants.Variant, true);
+        }
+
+        public virtual void OnEnter()
+        {
+            if (Map == null)
+                Drop();
+            OnRender();
+            //var render = RenderOnce(OnRender);
+            //render();
+        }
+
+        private void Drop()
+        {
+            // There suppose to be nothing here so just ignore this for now.
+        }
+
+        protected virtual void OnRender()
+        {
+            RenderMap(ID);
         }
 
         public void RenderMap(int id)
@@ -78,25 +99,24 @@ namespace Ecalia.Engine.Graphics
             catch { }
         }
 
-        private void RenderBackground(int a, int ani, string bS, int cx, int cy, int f, int front, int no, int rx, int ry, int type, int x, int y)
+        private void RenderBackground(int a, int ani, string bS, int cx, int cy, int f, int front, int no, int rx, int ry, int type, int x, int y, int z = 0)
         {
+            var spr = new Sprite(CApplication.GraphicsDevice);
             try
             {
-                using (Map)
-                {
-                    var back = Map.MainDirectory["Back"][bS + ".img"]["back"][no.ToString()] as WZCanvasProperty;
+                var back = Map.MainDirectory["Back"][bS + ".img"]["back"][no.ToString()] as WZCanvasProperty;
 
-                    var texture = Texture.FromMemory(CApplication.GraphicsDevice, GetData(back.Value));
+                var texture = Texture.FromMemory(CApplication.GraphicsDevice, GetData(back.Value));
 
-                    var spr = new Sprite(CApplication.GraphicsDevice);
-
-                    spr.Begin(SpriteFlags.SortDepthBackToFront);
-                    spr.Draw(texture, new RawColorBGRA(0xFF, 0xFF, 0xFF, 0xFF));
-                    spr.End();
-                }
+                spr.Begin(SpriteFlags.SortDepthBackToFront);
+                spr.Draw(texture, new RawColorBGRA(0xFF, 0xFF, 0xFF, 0xFF));
+                
             }
             catch { }
-            finally { }
+            finally
+            {
+                spr.End();
+            }
         }
 
         public void Update()
@@ -104,7 +124,7 @@ namespace Ecalia.Engine.Graphics
 
         }
 
-        private void RenderObjects(string os, int x, int y, int z = 0)
+        private void RenderObjects(string oS, int x, int y, int z = 0)
         {
 
         }
@@ -144,6 +164,26 @@ namespace Ecalia.Engine.Graphics
                 return id.ToString();
             else
                 return string.Empty;
+        }
+
+        Action RenderOnce(Action action)
+        {
+            var context = new RenderOnlyOnce();
+            Action ret = () =>
+            {
+                if (false == context.AlreadyCalled)
+                {
+                    action();
+                    context.AlreadyCalled = true;
+                }
+            };
+
+            return ret;
+        }
+
+        class RenderOnlyOnce
+        {
+            public bool AlreadyCalled;
         }
     }
 }
