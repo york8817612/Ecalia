@@ -2,7 +2,7 @@
 using Ecalia.Screens;
 using reWZ;
 using reWZ.WZProperties;
-using SharpDX.Direct3D9;
+using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
 using System;
 using System.Collections.Generic;
@@ -17,8 +17,11 @@ namespace Ecalia.Engine.Graphics
     {
         private WZFile Map, UI;
 
-        private int a, ani, cx, cy, f, front, no, rx, ry, type, x, y;
+        private int a, ani, cx, cy, f, front, no, rx, ry, type, x, y, z;
         private string bS, tS, oS;
+        private int _f, zM; // f is actually a bool but lets leave it like this for now...
+        private string l0, l1, l2;
+        private RawColorBGRA kpOrig = new RawColorBGRA(0xFF, 0xFF, 0xFF, 0xFF);
 
         public int ID { get; set; }
 
@@ -30,16 +33,9 @@ namespace Ecalia.Engine.Graphics
 
         public virtual void OnEnter()
         {
-            if (Map == null)
-                Drop();
-            OnRender();
-            //var render = RenderOnce(OnRender);
-            //render();
-        }
-
-        private void Drop()
-        {
-            // There suppose to be nothing here so just ignore this for now.
+            //OnRender();
+            var render = RenderOnce(OnRender);
+            render();
         }
 
         protected virtual void OnRender()
@@ -51,80 +47,117 @@ namespace Ecalia.Engine.Graphics
         {
             try
             {
-                using (Map)
+                foreach (WZSubProperty SubProp in Map.MainDirectory["Map"]["Map" + GetTrueId(id)[0]][GetTrueId(id) + ".img"])
                 {
-                    foreach (WZSubProperty SubProp in Map.MainDirectory["Map"]["Map" + GetTrueId(id)[0]][GetTrueId(id) + ".img"])
+                    foreach (var item in SubProp)
                     {
-                        foreach (var item in SubProp)
-                        {
-                            // Background
-                            if (item.HasChild("a"))
-                                a = item["a"].ValueOrDie<int>();
-                            if (item.HasChild("ani"))
-                                ani = item["ani"].ValueOrDie<int>();
-                            if (item.HasChild("bS"))
-                                bS = item["bS"].ValueOrDie<string>();
-                            if (item.HasChild("cx"))
-                                cx = item["cx"].ValueOrDie<int>();
-                            if (item.HasChild("cy"))
-                                cy = item["cy"].ValueOrDie<int>();
-                            if (item.HasChild("f"))
-                                f = item["f"].ValueOrDie<int>();
-                            if (item.HasChild("front"))
-                                front = item["front"].ValueOrDie<int>();
-                            if (item.HasChild("no"))
-                                no = item["no"].ValueOrDie<int>();
-                            if (item.HasChild("rx"))
-                                rx = item["rx"].ValueOrDie<int>();
-                            if (item.HasChild("ry"))
-                                ry = item["ry"].ValueOrDie<int>();
-                            if (item.HasChild("type"))
-                                type = item["type"].ValueOrDie<int>();
-                            if (item.HasChild("x"))
-                                x = item["x"].ValueOrDie<int>();
-                            if (item.HasChild("y"))
-                                y = item["y"].ValueOrDie<int>();
+                        // Background
+                        if (item.HasChild("a"))
+                            a = item["a"].ValueOrDie<int>();
+                        if (item.HasChild("ani"))
+                            ani = item["ani"].ValueOrDie<int>();
+                        if (item.HasChild("bS"))
+                            bS = item["bS"].ValueOrDie<string>();
+                        if (item.HasChild("cx"))
+                            cx = item["cx"].ValueOrDie<int>();
+                        if (item.HasChild("cy"))
+                            cy = item["cy"].ValueOrDie<int>();
+                        if (item.HasChild("f"))
+                            f = item["f"].ValueOrDie<int>();
+                        if (item.HasChild("front"))
+                            front = item["front"].ValueOrDie<int>();
+                        if (item.HasChild("no"))
+                            no = item["no"].ValueOrDie<int>();
+                        if (item.HasChild("rx"))
+                            rx = item["rx"].ValueOrDie<int>();
+                        if (item.HasChild("ry"))
+                            ry = item["ry"].ValueOrDie<int>();
+                        if (item.HasChild("type"))
+                            type = item["type"].ValueOrDie<int>();
+                        if (item.HasChild("x"))
+                            x = item["x"].ValueOrDie<int>();
+                        if (item.HasChild("y"))
+                            y = item["y"].ValueOrDie<int>();
+                        if (item.HasChild("z"))
+                            z = item["z"].ValueOrDie<int>();
 
-                            if (bS != null)
-                                RenderBackground(a, ani, bS, cx, cy, f, front, no, rx, ry, type, x, y);
+                        if (bS != null)
+                            RenderBackground(a, ani, bS, cx, cy, f, front, no, rx, ry, type, x, y);
+                        else
+                            continue;
+                        // Map Objects
 
-                            // Map Objects
+                        if (item.HasChild("f"))
+                            f = item["f"].ValueOrDie<int>();
+                        if (item.HasChild("l0"))
+                            l0 = item["l0"].ValueOrDie<string>();
+                        if (item.HasChild("l1"))
+                            l1 = item["l1"].ValueOrDie<string>();
+                        if (item.HasChild("l2"))
+                            l2 = item["l2"].ValueOrDie<string>();
+                        if (item.HasChild("oS"))
+                            oS = item["oS"].ValueOrDie<string>();
+                        if (item.HasChild("x"))
+                            x = item["x"].ValueOrDie<int>();
+                        if (item.HasChild("y"))
+                            y = item["y"].ValueOrDie<int>();
+                        if (item.HasChild("z"))
+                            z = item["z"].ValueOrDie<int>();
+
+                        if (oS != null)
+                            RenderObjects(oS, l0, l1, l2, f, x, y);
+                        else
+                            continue;
 
 
-                            // Map Tiles
-                        }
+                        // Map Tiles
+
+
                     }
                 }
             }
             catch { }
         }
 
+        private void RenderObjects(string oS, string l0, string l1, string l2, int f, int x, int y, int z = 0)
+        {
+            var MapObj = Map.MainDirectory["Obj"][oS][l0][l1][l2] as WZSubProperty;
+            //var spr = new Sprite(CDrawManager.GraphicDevice);
+           // Texture tex;
+
+            foreach (var obj in MapObj)
+            {
+                if (obj is WZCanvasProperty)
+                {
+                    //tex = Texture.FromMemory(CDrawManager.GraphicDevice, GetData(((WZCanvasProperty)obj).Value));
+                    //spr.Begin();
+                    //spr.Draw(tex, kpOrig);
+                    //spr.End();
+                }
+            }
+        }
+
         private void RenderBackground(int a, int ani, string bS, int cx, int cy, int f, int front, int no, int rx, int ry, int type, int x, int y, int z = 0)
         {
-            var spr = new Sprite(CApplication.GraphicsDevice);
+            //var spr = new Sprite(CDrawManager.GraphicDevice);
             try
             {
                 var back = Map.MainDirectory["Back"][bS + ".img"]["back"][no.ToString()] as WZCanvasProperty;
 
-                var texture = Texture.FromMemory(CApplication.GraphicsDevice, GetData(back.Value));
+                //var texture = Texture.FromMemory(CDrawManager.GraphicDevice, GetData(back.Value));
 
-                spr.Begin(SpriteFlags.SortDepthBackToFront);
-                spr.Draw(texture, new RawColorBGRA(0xFF, 0xFF, 0xFF, 0xFF));
+                //spr.Begin(SpriteFlags.None);
+                //spr.Draw(texture, new RawColorBGRA(0xFF, 0xFF, 0xFF, 0xFF));
                 
             }
             catch { }
             finally
             {
-                spr.End();
+                //spr.End();
             }
         }
 
         public void Update()
-        {
-
-        }
-
-        private void RenderObjects(string oS, int x, int y, int z = 0)
         {
 
         }
