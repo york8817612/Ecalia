@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Ecalia.Screens;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Ecalia
 {
@@ -10,9 +12,9 @@ namespace Ecalia
     {
         static void Main(string[] args)
         {
-            using (MainGame game = new MainGame())
+            using (CApplication app = new CApplication())
             {
-                game.Run();
+                app.Run();
             }
         }
     }
